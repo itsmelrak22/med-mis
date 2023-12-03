@@ -1,1 +1,7 @@
 @import '~@mdi/font/css/materialdesignicons.css';
+
+.v-dialog .required .v-text-field__slot label::before,.v-dialog .required .v-select__slot label::before {
+    content: '* ';
+    color: red;
+ }
+ 

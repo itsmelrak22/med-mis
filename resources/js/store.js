@@ -93,6 +93,9 @@ export default new Vuex.Store({
         SUPPLIERS: [],
         SUPPLIES: [],
         USERS: [],
+        SALES_ORDERS: [],
+        ORDER_DETAILS: [],
+        CUSTOMERS: [],
     },
 
     actions:{
@@ -138,6 +141,30 @@ export default new Vuex.Store({
                 commit("_getUsers", data)
             })
         },
+        _getSalesOrders({ commit }) {
+            axios({
+              method: "get",
+              url: "/api/sales_orders",
+            }).then(({ data }) => {
+              commit("_getSalesOrders", data);
+            });
+        },
+        _getOrderDetails({ commit }) {
+            axios({
+              method: "get",
+              url: "/api/order_details",
+            }).then(({ data }) => {
+              commit("_getOrderDetails", data);
+            });
+        },
+        _getCustomers({ commit }) {
+            axios({
+              method: "get",
+              url: "/api/customers",
+            }).then(({ data }) => {
+              commit("_getCustomers", data);
+            });
+        },
     },
 
     mutations:{
@@ -154,8 +181,6 @@ export default new Vuex.Store({
         getUsers(state, data){
             state.allUsers = data
         },
-
-
         _getSuppliers( state, payload ){
             state.SUPPLIERS = payload;
         },
@@ -164,6 +189,15 @@ export default new Vuex.Store({
         },
         _getUsers( state, payload ){
             state.USERS = payload;
+        },
+        _getSalesOrders(state, payload) {
+            state.SALES_ORDERS = payload;
+        },
+        _getOrderDetails(state, payload) {
+            state.ORDER_DETAILS = payload;
+        },
+        _getCustomers(state, payload) {
+            state.CUSTOMERS = payload;
         },
     },
     getters:{},

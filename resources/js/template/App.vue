@@ -73,7 +73,10 @@ import {mapState} from 'vuex';
             {text:'Supplies', icon:'mdi-hand-wave', to:'supply'},
             {text: 'Suppliers', icon: 'mdi-account-group', to : 'supplier'},
             {text: 'Sales', icon: 'mdi-account-group', to : 'sale'},
-            {text: 'Users', icon: 'mdi-account', to : 'user'}
+            {text: 'Users', icon: 'mdi-account', to : 'user'},
+            {text: 'Customers', icon: 'mdi-account', to : 'customer'},
+            {text: 'Sales Orders', icon: 'mdi-account', to : 'sales_orders'},
+            {text: 'Order Details', icon: 'mdi-account', to : 'order_details'},
          ],
          csrf: document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
 
