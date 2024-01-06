@@ -30,15 +30,18 @@ export default new Vuex.Store({
                 // (v) => !v || /[a-zA-Z]/.test(v) || "Must contain letter",
                 // v => !v || /[@$!%*?&]/.test(v) || 'Must contain symbol',
                 (v) =>
-                    (v || "").length >= 8 ||
-                    "Must contain atlest 8 characters.",
+                    (v || "").length >= 4 ||
+                    "Must contain atlest 4 characters.",
             ],
             hex: [
                 (v) =>
                     !v || /[0-9A-Fa-f]{6}/.test(v) || "Must be a hex value",
             ],
             confirmpassword(temp, actual) {
-                return [(v) => temp === actual || "Password must match"];
+                return [
+                    (v) => temp === actual || "Password must match",
+                    (v) => !!v || "Field is required",
+                ];
             },
             uniqueRole(list) {
                 return [

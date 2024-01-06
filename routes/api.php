@@ -27,8 +27,13 @@ use App\Models\User;
 // });
 
 
-    Route::get('/users', [UserController::class, 'index']);
-
+    // Users
+    Route::get('users', [UserController::class, 'index']);
+    Route::get('users/{id}', [UserController::class, 'show']);
+    Route::post('users', [UserController::class, 'store']);
+    Route::post('user/{user}/change_password', [UserController::class, 'change']);
+    Route::put('users/{id}', [UserController::class, 'update']);
+    Route::delete('users/{id}', [UserController::class, 'destroy']);
 
     Route::get('/supplies', [SupplyController::class, 'index']);
     Route::post('/supply/store', [SupplyController::class, 'store']);
@@ -59,3 +64,5 @@ use App\Models\User;
     Route::post('order_details', [OrderDetailController::class, 'store']);
     Route::put('order_details/{id}', [OrderDetailController::class, 'update']);
     Route::delete('order_details/{id}', [OrderDetailController::class, 'destroy']);
+
+

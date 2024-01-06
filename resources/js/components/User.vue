@@ -19,9 +19,8 @@
                     raised
                     small
                     dark
-                    disabled
                     @click="toggleStore(true)"
-                >Add Supplier</v-btn>
+                >Add User</v-btn>
             </v-card-title>
             <v-card-text>
                 <v-data-table
@@ -33,6 +32,7 @@
                 >
                 <template v-slot:[`item.actions`]="{ item }">
                     <v-icon
+                        v-if="loggedInUser.is_super_admin || loggedInUser.is_admin"
                         small
                         class="mr-2"
                         @click="toggleUpdate(true , item)"
@@ -40,6 +40,7 @@
                         mdi-pencil
                     </v-icon>
                     <v-icon
+                        v-if="loggedInUser.is_super_admin"
                         small
                         @click="toggleDelete(true , item)"
                     >
@@ -65,7 +66,7 @@
             <v-form id="Store" ref="Store" @submit.prevent="Store">
                 <v-card>
                     <v-card-title> 
-                      <span class="overline">Create New Supplier</span> 
+                      <span class="overline">Create New User</span> 
                     </v-card-title>
                     <v-card-text>
                         <v-row>
@@ -76,32 +77,26 @@
                                     label="Name"
                                     name="name" 
                                     class="required"
-                                    :rules="rules.uniqueData(USERS)"
+                                    :rules="rules.required"
                                 > </v-text-field>
                                 <v-text-field 
                                     outlined 
                                     dense 
-                                    label="Info"
-                                    name="info" 
+                                    label="Email"
+                                    name="email" 
                                     class="required"
                                     :rules="rules.uniqueData(USERS)"
                                 > </v-text-field>
-                                <v-text-field 
-                                    outlined 
-                                    dense 
-                                    label="Address"
-                                    name="address" 
-                                    class="required"
-                                    :rules="rules.uniqueData(USERS)"
-                                > </v-text-field>
-                                <v-text-field 
-                                    outlined 
-                                    dense 
-                                    label="Phone"
-                                    name="phone" 
-                                    class="required"
-                                    :rules="rules.uniqueData(USERS)"
-                                > </v-text-field>
+
+                                <v-checkbox
+                                    v-model="checkbox"
+                                    label="Admin"
+                                    name="is_admin"
+                                    hint="Give this user admin rights?"
+                                    @click="toggleWarningDialog(true)"
+                                    :value="checkbox"
+                                ></v-checkbox>
+                             
 
                                 <input type="hidden" name="auth_id" :value="loggedInUser.id">
                             </v-col>
@@ -109,8 +104,8 @@
                     </v-card-text>
                     <v-card-actions>
                         <v-spacer></v-spacer>
-                        <v-btn text @click="dialogStore = false">Cancel</v-btn>
-                        <v-btn text type="submit">Submit</v-btn>
+                        <v-btn text @click="toggleStore(false)">Cancel</v-btn>
+                        <v-btn text type="submit" >Submit</v-btn>
                     </v-card-actions>
                 </v-card>
             </v-form>
@@ -197,6 +192,40 @@
         </v-dialog>
         <!-- dialogDelete End -->
 
+        <!-- dialogWarning Start -->
+        <v-dialog v-model="dialogWarning" max-width="400" persistent>
+            <v-card>
+                <v-card-title class="text-h5">
+                    Warning!
+                </v-card-title>
+
+                <v-card-text>
+                    Admin access allows critical system changes. It can lead to disruptions or potential misuse if in wrong hands. Only grant it to trustworthy and knowledgeable users. Always provide the least access necessary for a user’s duties.
+                </v-card-text>
+
+                <v-card-actions>
+                <v-spacer></v-spacer>
+
+                <v-btn
+                    color="green darken-1"
+                    text
+                    @click="dialogWarning = false"
+                >
+                    Disagree
+                </v-btn>
+
+                <v-btn
+                    color="green darken-1"
+                    text
+                    @click="makeAdmin()"
+                >
+                    Agree
+                </v-btn>
+                </v-card-actions>
+            </v-card>
+          </v-dialog>
+        <!-- dialogWarning End -->
+
 <!-- ################################# OVERLAY #################################-->
         <v-overlay :value="overlay">
             <v-progress-circular
@@ -241,10 +270,12 @@ export default {
                     align: 'start',
                     value: 'updated_at',
                 },
-                // { text: 'Actions', value: 'actions', sortable: false, width: "10%" },
+                { text: 'Actions', value: 'actions', sortable: false, width: "10%" },
             ],
             search: '',
-            tempData: {}
+            tempData: {},
+            checkbox: false,
+            dialogWarning: false
         }
     },
 
@@ -264,8 +295,27 @@ export default {
         async initialize(){
             await this._getUsers()
         },
+        makeAdmin(){
+            this.$nextTick( () => {
+                this.dialogWarning = false, 
+                this.checkbox = true;
+            } )
+        },
+        toggleWarningDialog(isShow){
+            
+            this.$nextTick( () => {
+                this.checkbox = false;
+                this.dialogWarning = isShow
+            } )
+            
+        },
         toggleStore(isShow){
-			this.dialogStore = isShow;
+            if(isShow){
+			    this.dialogStore = isShow;
+            }else{
+                this.$refs.Store.reset();
+			    this.dialogStore = false;
+            }
 		},
         toggleUpdate(isShow, object = {}){
             if( ! isShow ) {
@@ -303,7 +353,7 @@ export default {
 
                 axios({
                     method: 'POST',
-                    url: '/api/supplier/store',
+                    url: '/api/users',
                     data: formdata
                 }).then(() => {
                     this._getUsers();

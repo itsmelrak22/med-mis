@@ -45,7 +45,7 @@
                      <v-list-item-content>
                         <v-form id="logOut" method="POST" action="logout" >
                            <input type="hidden" name="_token" :value="csrf">
-                           <input type="submit" value="Logout" depressed class="caption" > <v-icon>mdi-logout</v-icon>
+                           <input id="logoutButton" type="submit" value="Logout" depressed class="caption" > <v-icon>mdi-logout</v-icon>
                         </v-form>
                      </v-list-item-content>
                   </v-list-item>
@@ -60,6 +60,64 @@
       <v-main class="ma-2">
          <router-view></router-view>
       </v-main>
+
+      <!-- dialogChangePassword Start -->
+         <v-dialog v-model="dialogChangePassword" max-width="400" persistent>
+            <v-form id="ChangePassword" ref="ChangePassword" @submit.prevent="ChangePassword">
+                <v-card>
+                    <v-card-title> 
+                      <span class="overline">Reset Password</span> 
+                    </v-card-title>
+                    <v-card-text>
+                        <v-row>
+                            <v-col cols="12">
+                                <v-text-field 
+                                    v-model="userPassword.password"
+                                    id="hiddenPassword"
+                                    label="Password"
+                                    autocomplete="off"
+                                    prepend-icon="mdi-lock" 
+                                    :type="showPassword ? 'text' : 'password' "
+                                    :append-icon="showPassword ? 'mdi-eye': 'mdi-eye-off'"
+                                    @click:append="showPassword = !showPassword"
+                                    @focus="$event.target.removeAttribute('readonly');"
+                                    required
+                                    readonly
+                                    outlined
+                                    dense
+                                    class="required"
+                                    name="password"
+                                    :rules="rules.password"
+                                > </v-text-field>
+                                <v-text-field 
+                                    v-model="userPassword.confirmPassword"
+                                    outlined 
+                                    dense 
+                                    label="Confirm Password"
+                                    name="confirm_password" 
+                                    class="required"
+                                    autocomplete="off"
+                                    prepend-icon="mdi-lock" 
+                                    :type="showConfirmPassword ? 'text' : 'password' "
+                                    :append-icon="showConfirmPassword ? 'mdi-eye': 'mdi-eye-off'"
+                                    @click:append="showConfirmPassword = !showConfirmPassword"
+                                    @focus="$event.target.removeAttribute('readonly');"
+                                    required
+                                    readonly
+                                    :rules="rules.confirmpassword(userPassword.confirmPassword,userPassword.password)"
+                                > </v-text-field>
+                                <input type="hidden" name="auth_id" :value="loggedInUser.id">
+                            </v-col>
+                        </v-row>
+                    </v-card-text>
+                    <v-card-actions>
+                        <v-spacer></v-spacer>
+                        <v-btn text type="submit" >Submit</v-btn>
+                    </v-card-actions>
+                </v-card>
+            </v-form>
+         </v-dialog>
+      <!-- dialogChangePassword End -->
   </v-app>
 </template>
 
@@ -79,14 +137,72 @@ import {mapState} from 'vuex';
             {text: 'Order Details', icon: 'mdi-account', to : 'order_details'},
          ],
          csrf: document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+         dialogChangePassword: false,
+         userPassword: {
+            password: '',
+            confirmPassword: ''
+         },
+         showConfirmPassword: false,
+         showPassword: false
+
 
       }),
 
+      methods: {
+         ChangePassword(){
+            if(this.$refs.ChangePassword.validate()){
+               const myForm = document.getElementById('ChangePassword');
+               const formdata = new FormData(myForm);
+
+               axios({
+                    method: 'POST',
+                    url: `/api/user/${this.loggedInUser.id}/change_password`,
+                    data: formdata
+                }).then(() => {
+                    this.$refs.ChangePassword.reset()
+                  //   this.dialogChangePassword = false;
+                  alert("PLEASE LOGIN AGAIN");
+                  // this.toggleLogout();
+                }).catch((err) => {
+                    console.log("ERROR __")
+                    console.err(err)
+                })
+                .finally(() => {
+                })
+            }
+         },
+
+         toggleLogout(){
+            const formdata = new FormData();
+            formdata.append("_token", this.csrf);
+
+            axios({
+                    method: 'POST',
+                    url: `/logout`,
+                    data: formdata
+                }).catch((err) => {
+                    console.log("ERROR __")
+                    console.err(err)
+                })
+                .finally(() => {
+                  location.reload()
+                })
+         }
+      },
+
       computed: {
          ...mapState([
-            'loggedInUser'
+            'loggedInUser',
+            'rules'
          ])
 
       },
+
+      mounted() {
+         const { is_password_already_reset } = this.loggedInUser;
+         if( ! +is_password_already_reset ){
+            this.dialogChangePassword = true;
+         }
+      }
    }
 </script>

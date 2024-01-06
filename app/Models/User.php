@@ -41,4 +41,20 @@ class User extends Authenticatable
     protected $casts = [
         'email_verified_at' => 'datetime',
     ];
+
+    public static function GET_ADMIN_USERS(){
+        return self::where([
+            ['is_admin', 1],
+            ['is_super_admin', 0],
+        ])
+        ->get();
+    }
+    public static function GET_NON_ADMIN_USERS(){
+        return self::where([
+            ['is_admin', 0],
+            ['is_super_admin', 0],
+
+        ])
+        ->get();
+    }
 }

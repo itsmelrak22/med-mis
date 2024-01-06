@@ -11,6 +11,8 @@ import Customer from './components/Customer'
 import OrderDetails from './components/OrderDetails'
 import SalesOrders from './components/SalesOrders'
 
+import store from './store'
+
 export default new VueRouter({
     mode: 'history',
     routes: [
@@ -37,7 +39,18 @@ export default new VueRouter({
         {
             path: '/user',
             name: 'user',
-            component : User
+            component : User,
+            beforeEnter: (to, from, next) => {
+                console.log('store.state.loggedInUser', store.state.loggedInUser)
+                // replace `store.state.user` with your actual user state
+                if (store.state.loggedInUser.is_super_admin || store.state.loggedInUser.is_admin) {
+                  next(); // proceed to '/supply' if admin
+                  
+                } else {
+                    alert('Invalid Role!')
+                  next('/home'); // redirect to home if not admin
+                }
+            }
         },
         {
             path: '/customer',
