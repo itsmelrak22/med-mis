@@ -35,7 +35,7 @@
                   </v-list-item-icon>
                   <v-list-item-content>
                      <v-list-item-title>
-                           <v-badge v-if="item.to == 'stock_in_request' && PENDING_STOCK_IN_REQUEST.length" color="green" :content="PENDING_STOCK_IN_REQUEST.length"> <div>{{ item.text }}</div> </v-badge> 
+                           <v-badge v-if="item.to == 'sales_order_request' && PENDING_SALES_ORDER_REQUEST.length" color="green" :content="PENDING_SALES_ORDER_REQUEST.length"> <div>{{ item.text }}</div> </v-badge> 
                         <div v-else color="white">{{ item.text }} </div> 
                      </v-list-item-title>
                   </v-list-item-content>
@@ -150,15 +150,15 @@ import {mapActions, mapState} from 'vuex';
          drawer: null,
          items:[
             // {text:'Home', icon:'mdi-home', to:'home'},
-            {text:'Supplies', icon:'mdi-hand-wave', to:'supply'},
-            {text: 'Sales', icon: 'mdi-account-group', to : 'sale'},
-            {text: 'Sales Orders', icon: 'mdi-account', to : 'sales_orders'},
+            {text:'Supply Inventory', icon:'mdi-view-module', to:'supply'},
+            {text: 'Sales Orders', icon: 'mdi-credit-card', to : 'sales_orders'},
             // {text: 'Order Details', icon: 'mdi-account', to : 'order_details'},
 
          ],
          adminItems: [
             //Admin Access
-            {text:'Supply Stock In Request', icon:'mdi-hand-wave', to:'stock_in_request'},
+            {text:'Sales Order Request', icon:'mdi-arrow-up-bold', to:'sales_order_request'},
+            {text:'Supply Stock-In Request', icon:'mdi-arrow-down-bold', to:'stock_in_request'},
             {text: 'Suppliers', icon: 'mdi-account-group', to : 'supplier'},
             {text: 'Users', icon: 'mdi-account', to : 'user'},
             {text: 'Customers', icon: 'mdi-account', to : 'customer'},
@@ -178,14 +178,16 @@ import {mapActions, mapState} from 'vuex';
          ...mapState([
             'loggedInUser',
             'rules',
-            'PENDING_STOCK_IN_REQUEST'
+            'PENDING_STOCK_IN_REQUEST',
+            'PENDING_SALES_ORDER_REQUEST'
          ])
 
       },
 
       methods: {
          ...mapActions([
-            '_getPendingStockInRequest'
+            '_getPendingStockInRequest',
+            '_getPendingSalesOrderRequests'
          ]),
 
           async initialize(){
@@ -234,6 +236,7 @@ import {mapActions, mapState} from 'vuex';
       },
       async mounted() {
          await this._getPendingStockInRequest()
+         await this._getPendingSalesOrderRequests()
 
          const { is_password_already_reset } = this.loggedInUser;
          if( ! +is_password_already_reset ){

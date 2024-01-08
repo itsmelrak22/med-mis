@@ -100,7 +100,6 @@ class SupplyStockInRequestController extends Controller
         \DB::commit();
         return 'success';
 
-
     }
 
     /**

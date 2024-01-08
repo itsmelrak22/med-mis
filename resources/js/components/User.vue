@@ -1,14 +1,19 @@
 <template>
     <v-container fluid>
         <v-card>
-            <v-card-text>
-                <v-text-field
-                    v-model="search"
-                    append-icon="mdi-magnify"
-                    label="Search"
-                    hide-details
-                ></v-text-field>
-            </v-card-text>
+            <v-toolbar elevation="4" >
+                <v-container>USERS</v-container>
+                <v-card-text>
+                    <v-text-field
+                        v-model="search"
+                        append-icon="mdi-magnify"
+                        label="Search"
+                        hide-details
+                        outlined
+                        dense
+                    ></v-text-field>
+                </v-card-text>
+            </v-toolbar>
         </v-card>
 
         <v-card>

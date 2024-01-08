@@ -1,8 +1,20 @@
 <template>
     <v-container fluid>
-        <!-- ... (existing code) ... -->
-
-        <!-- Add Customer -->
+        <v-card>
+            <v-toolbar elevation="4" >
+                <v-container>CUSTOMERS</v-container>
+                <v-card-text>
+                    <v-text-field
+                        v-model="search"
+                        append-icon="mdi-magnify"
+                        label="Search"
+                        hide-details
+                        outlined
+                        dense
+                    ></v-text-field>
+                </v-card-text>
+            </v-toolbar>
+        </v-card>
         <v-card>
             <v-card-title>
                 <v-btn

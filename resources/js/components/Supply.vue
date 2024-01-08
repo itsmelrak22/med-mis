@@ -2,7 +2,7 @@
     <v-container fluid>
         <v-card>
             <v-toolbar elevation="4" >
-                <v-container>SUPPLIES</v-container>
+                <v-container>SUPPLY INVENTORY</v-container>
                 <v-card-text>
                     <v-text-field
                         v-model="search"
@@ -15,7 +15,6 @@
                 </v-card-text>
             </v-toolbar>
         </v-card>
-
         <v-card>
             <v-card-title>
                 <v-btn
@@ -27,7 +26,7 @@
                     dark
                     @click="toggleStore(true)"
                 >
-                    Request Supply Stock In
+                    Request Supply Stock-In
                 </v-btn>
 
             </v-card-title>
@@ -365,9 +364,7 @@ export default {
         if(supply.id){
             this.tempData = supply
             this.tempData.supplier_id = +this.tempData.supplier_id
-            console.log('this.tempData', this.tempData)
         }
-
       },
       toggleStore(isShow){
         this.dialogStore = isShow;

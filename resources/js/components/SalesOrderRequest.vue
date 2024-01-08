@@ -2,7 +2,7 @@
     <v-container fluid>
         <v-card>
             <v-toolbar elevation="4" >
-                <v-container>STOCK-IN REQUEST</v-container>
+                <v-container>SALES ORDER REQUEST</v-container>
                 <v-card-text>
                     <v-text-field
                         v-model="search"
@@ -22,7 +22,7 @@
                     height="60vh"
                     class="mainTable"
                     :headers="headers"
-                    :items="STOCK_IN_REQUEST"
+                    :items="SALES_ORDER_REQUEST"
                     :search="search"
                 >
                 <template v-slot:[`item.created_at`]="{ item }">
@@ -65,7 +65,7 @@
         <v-dialog v-model="dialogUpdate" max-width="400" persistent>
             <v-form id="Update" ref="Update" @submit.prevent="Update">
                 <v-card>
-                    <v-card-title> <span class="overline">Update Stock In Request</span> </v-card-title>
+                    <v-card-title> <span class="overline">Sales Order Request Request</span> </v-card-title>
                         <v-card-text>
                             <v-row>
                               <v-col cols="12">
@@ -77,11 +77,12 @@
                                     name="name" 
                                     readonly
                                 > </v-text-field>
+                                
                                 <v-text-field 
                                     v-model="tempData.quantity"
                                     outlined 
                                     dense 
-                                    label="Quantity"
+                                    label="Sale Order Quantity"
                                     name="quantity" 
                                     readonly
                                 > </v-text-field>
@@ -109,6 +110,13 @@
                                     name="requested_date" 
                                     readonly
                                 > </v-text-field>
+                                <v-text-field 
+                                    v-model="itemInStockQty"
+                                    outlined 
+                                    dense 
+                                    label="Item in Stock Quantity"
+                                    readonly
+                                > </v-text-field>
                                 <v-autocomplete
                                     :items="['APPROVED', 'CANCELLED']"
                                     outlined 
@@ -121,8 +129,8 @@
                                 ></v-autocomplete>
                                 <input type="hidden" name="auth_id" :value="loggedInUser.id">
                                 <input type="hidden" name="supply_id" :value="tempData.supply_id">
-                                <input type="hidden" name="supply_stock_in_request_detail_id" :value="tempData.supply_stock_in_request_detail_id">
-                                <input type="hidden" name="supply_stock_in_request_id" :value="tempData.supply_stock_in_request_id">
+                                <input type="hidden" name="sales_order_request_details_id" :value="tempData.sales_order_request_details_id">
+                                <input type="hidden" name="sales_order_requests_id" :value="tempData.sales_order_requests_id">
                               </v-col>
                             </v-row>
                         </v-card-text>
@@ -162,12 +170,17 @@ export default {
 
             headers: [
                 {
-                    text: 'Name',
+                    text: 'Customer',
+                    align: 'start',
+                    value: 'customer_name',
+                },
+                {
+                    text: 'Supply',
                     align: 'start',
                     value: 'name',
                 },
                 {
-                    text: 'Request Quantity',
+                    text: 'Sale Quantity',
                     align: 'start',
                     value: 'quantity',
                 },
@@ -182,25 +195,26 @@ export default {
                     value: 'status',
                 },
                 {
-                    text: 'Stock In Request Date',
+                    text: 'Sales Order Request Date',
                     align: 'start',
                     value: 'created_at',
                 },
-                {
-                    text: 'Requested By',
-                    align: 'start',
-                    value: 'requested_by',
-                },
-                {
-                    text: 'Last Updated Date',
-                    align: 'start',
-                    value: 'updated_at',
-                },
+                // {
+                //     text: 'Requested By',
+                //     align: 'start',
+                //     value: 'requested_by',
+                // },
+                // {
+                //     text: 'Last Updated Date',
+                //     align: 'start',
+                //     value: 'updated_at',
+                // },
                 { text: 'Actions', value: 'actions', sortable: false, width: "10%" },
             ],
             search: '',
             tempData: {},
-            tab: 0
+            tab: 0,
+            itemInStockQty: 0
         }
     },
 
@@ -210,7 +224,7 @@ export default {
             'SUPPLIES',
             'rules',
             'loggedInUser',
-            'STOCK_IN_REQUEST'
+            'SALES_ORDER_REQUEST'
         ]),
     },
 
@@ -218,10 +232,12 @@ export default {
         ...mapActions([
             '_getSuppliers',
             '_getSupplies',
-            '_getStockInRequest'
+            '_getSalesOrderRequests',
         ]),
         async initialize(){
-            await this._getStockInRequest()
+            await this._getSalesOrderRequests()
+            await this._getSuppliers()
+            await this._getSupplies()
         },
         getFormattedDate(date) {
             let newDate = new Date(date);
@@ -231,19 +247,25 @@ export default {
         
             return month + '/' + day + '/' + year;
         },
-        toggleUpdate(isShow, object = {}){
-          if( ! isShow ) {
-              this.dialogUpdate = false;
-              this.tempData = {};
-              return;
-          }
-          if( ! Object.keys(object).length > 0 ) {
-              console.log( 'toggleUpdate', 'no data' );
-              return;
-          }
+        async toggleUpdate(isShow, object = {}){
+            if( ! isShow ) {
+                this.dialogUpdate = false;
+                this.tempData = {};
+                return;
+            }
+            if( ! Object.keys(object).length > 0 ) {
+                console.log( 'toggleUpdate', 'no data' );
+                return;
+            }
 
-			  this.dialogUpdate = isShow;
+            await this._getSupplies()
+
+            this.dialogUpdate = isShow;
             this.tempData = {...object};
+            const itemInStock = this.SUPPLIES.find(res => res.id == this.tempData.supply_id);
+            if(itemInStock.id){
+                this.itemInStockQty = itemInStock.quantity
+            }
         },
         toggleView(isShow, object = {}){
           if( ! isShow ) {
@@ -267,10 +289,10 @@ export default {
 
                 axios({
                     method: 'POST',
-                    url: `/api/stock_in_request/update/${this.tempData.supply_stock_in_request_id}`,
+                    url: `/api/sales_order_request/update/${this.tempData.sales_order_requests_id}`,
                     data: formdata
                 }).then(() => {
-                    this._getStockInRequest();
+                    this._getSalesOrderRequests();
                     this.$refs.Update.reset()
                     this.toggleUpdate(false);
                 }).catch((err) => {

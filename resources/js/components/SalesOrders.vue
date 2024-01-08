@@ -1,27 +1,45 @@
 <template>
     <v-container fluid>
-        <!-- ... (existing code) ... -->
-
-        <!-- Add Sales Orders -->
+        <v-card>
+            <v-toolbar elevation="4" >
+                <v-container>SALES ORDER</v-container>
+                <v-card-text>
+                    <v-text-field
+                        v-model="search"
+                        append-icon="mdi-magnify"
+                        label="Search"
+                        hide-details
+                        outlined
+                        dense
+                    ></v-text-field>
+                </v-card-text>
+            </v-toolbar>
+        </v-card>
         <v-card>
             <v-card-title>
                 <v-btn
+                    class="mx-1 my-1"
                     color="#34495E"
                     elevation="2"
                     raised
                     small
                     dark
                     @click="toggleSalesOrdersStore(true)"
-                >Add Sales Order</v-btn>
+                >                    
+                Request Sales Order
+                </v-btn>
             </v-card-title>
             <v-card-text>
                 <v-data-table
                     height="60vh"
                     class="mainTable"
                     :headers="salesOrdersHeaders"
-                    :items="SALES_ORDERS"
+                    :items="SALES_ORDER_REQUEST"
                     :search="search"
                 >
+                    <template v-slot:[`item.created_at`]="{ item }">
+                        {{ getFormattedDate(item.created_at) }}
+                    </template>
                     <template v-slot:[`item.salesOrders_actions`]="{ item }">
                         <v-icon
                             small
@@ -30,17 +48,11 @@
                         >
                             mdi-pencil
                         </v-icon>
-                        <v-icon
-                            small
-                            @click="toggleSalesOrdersDelete(true , item)"
-                        >
-                            mdi-delete
-                        </v-icon>
                     </template>
                     <template v-slot:no-data>
                         <v-btn
                             color="primary"
-                            @click="initializeSalesOrders"
+                            @click="_getSalesOrderRequests"
                         >
                             Reset
                         </v-btn>
@@ -52,8 +64,83 @@
         <!-- Sales Orders Dialogs -->
         <!-- dialogSalesOrdersStore Start -->
         <v-dialog v-model="dialogSalesOrdersStore" max-width="400" persistent>
-            <v-form id="SalesOrdersStore" ref="SalesOrdersStore" @submit.prevent="storeSalesOrders">
-                <!-- ... (existing sales_orders form code) ... -->
+            <v-form id="SalesOrdersStore" ref="SalesOrdersStore" @submit.prevent="SalesOrdersStore">
+                <v-card>
+                    <v-card-title> 
+                      <span class="overline">Create New Sales Order Request</span> 
+                    </v-card-title>
+                    <v-card-text>
+                        <v-row>
+                            <v-col cols="12">
+                                <v-card-text>
+                                    
+                                    <v-autocomplete
+                                        v-model="tempData.supply_id"
+                                        :items="SUPPLIES"
+                                        item-value="id"
+                                        item-text="name"
+                                        outlined 
+                                        dense 
+                                        label="Supply Ordered"
+                                        name="supply_id" 
+                                        class="required"
+                                        :rules="rules.uniqueData(SUPPLIERS)"
+                                        @change="setSupplierInfo(tempData.supply_id)"
+                                    > </v-autocomplete>
+
+                                    <v-autocomplete
+                                        v-model="tempData.supplier_id"
+                                        :items="SUPPLIERS"
+                                        item-text="name"
+                                        item-value="id"
+                                        outlined 
+                                        label="Supplier"
+                                        name="supplier_id" 
+                                        class="required"
+                                        clearable
+                                        :rules="rules.required"
+                                        dense
+                                        :disabled="true"
+                                    ></v-autocomplete>
+
+                                    <v-autocomplete
+                                        v-model="tempData.customer_id"
+                                        :items="CUSTOMERS"
+                                        item-value="id"
+                                        item-text="name"
+                                        outlined 
+                                        dense 
+                                        label="Customer"
+                                        name="customer_id" 
+                                        class="required"
+                                        :disabled="!tempData.supply_id"
+                                    > </v-autocomplete>
+
+                                    <v-text-field 
+                                        outlined 
+                                        dense 
+                                        label="Quantity"
+                                        name="quantity" 
+                                        class="required"
+                                        type="number"
+                                        :rules="[v => !isNaN(parseFloat(v)) && v > 0 || 'Input must be a number greater than 0']"
+                                        :disabled="!tempData.supply_id"
+                                    > </v-text-field>
+
+                                    <input type="hidden" name="auth_id" :value="loggedInUser.id">
+                                    <input type="hidden" name="stock_in_type" value="existing">
+                                    <input type="hidden" name="supply_name" :value="tempData.name">
+
+                                    <v-card-actions>
+                                        <v-spacer></v-spacer>
+                                        <v-btn text @click="dialogStore = false">Cancel</v-btn>
+                                        <v-btn text type="submit">Submit</v-btn>
+                                    </v-card-actions>
+                                </v-card-text>
+                            </v-col>
+                        </v-row>
+                    </v-card-text>
+                </v-card>
             </v-form>
         </v-dialog>
         <!-- dialogSalesOrdersStore End -->
@@ -91,19 +178,34 @@ export default {
                 {
                     text: 'Order Number',
                     align: 'start',
-                    value: 'order_number',
+                    value: 'sales_order_requests_id',
+                },
+                {
+                    text: 'Ordered Supply',
+                    align: 'start',
+                    value: 'name',
+                },
+                {
+                    text: 'Ordered Quantity',
+                    align: 'start',
+                    value: 'quantity',
                 },
                 {
                     text: 'Customer',
                     align: 'start',
-                    value: 'customer',
+                    value: 'customer_name',
+                },
+                {
+                    text: 'Status',
+                    align: 'start',
+                    value: 'status',
                 },
                 {
                     text: 'Order Date',
                     align: 'start',
-                    value: 'order_date',
+                    value: 'created_at',
                 },
-                { text: 'Actions', value: 'salesOrders_actions', sortable: false, width: "10%" },
+                // { text: 'Actions', value: 'salesOrders_actions', sortable: false, width: "10%" },
             ],
             search: '',
             tempData: {},
@@ -114,16 +216,60 @@ export default {
     computed: {
         ...mapState([
             // ... (existing mapped states) ...
-            'SALES_ORDERS',
+            'SALES_ORDER_REQUEST',
+            'SUPPLIERS',
+            'rules',
+            'loggedInUser',
+            'SUPPLIES',
+            'CUSTOMERS'
+
         ]),
     },
     methods: {
         ...mapActions([
             // ... (existing mapped actions) ...
-            '_getSalesOrders',
+            '_getSalesOrderRequests',
+            '_getSuppliers',
+            '_getSupplies',
+            '_getCustomers'
         ]),
+        setSupplierInfo(id){
+            const supply = this.SUPPLIES.find(res => res.id == id);
+            if(supply.id){
+                this.tempData = supply
+                this.tempData.supply_id = supply.id
+                this.tempData.supplier_id = +this.tempData.supplier_id
+                console.log('this.tempData', this.tempData)
+            }
+        },
         async initializeSalesOrders(){
-            await this._getSalesOrders()
+            await this._getSalesOrderRequests()
+            await this._getSuppliers()
+            await this._getSupplies()
+            await this._getCustomers()
+        },
+        SalesOrdersStore(){
+            if(this.$refs.SalesOrdersStore.validate()){
+                this.overlay = true;
+                const myForm = document.getElementById('SalesOrdersStore');
+                const formdata = new FormData(myForm);
+
+                axios({
+                    method: 'POST',
+                    url: '/api/sales_order_request/store',
+                    data: formdata
+                }).then(() => {
+                    this._getSalesOrderRequests();
+                    this.$refs.SalesOrdersStore.reset()
+                    this.dialogSalesOrdersStore = false;
+                }).catch((err) => {
+                    console.log("ERROR __")
+                    console.err(err)
+                })
+                .finally(() => {
+                    this.overlay = false;
+                })
+            }
         },
         // ... (existing methods) ...
         toggleSalesOrdersStore(isShow) {
@@ -144,13 +290,21 @@ export default {
         deleteSalesOrders() {
             // ... (existing code) ...
         },
+        getFormattedDate(date) {
+            let newDate = new Date(date);
+            let year = newDate.getFullYear();
+            let month = (1 + newDate.getMonth()).toString().padStart(2, '0');
+            let day = newDate.getDate().toString().padStart(2, '0');
+        
+            return month + '/' + day + '/' + year;
+        }
         // ... (existing methods) ...
     },
     async mounted() {
-        this.overlay = true;
-        await this._getSalesOrders().then(() => {
-            this.overlay = false;
-        });
+       this.overlay = true;
+        await this.initializeSalesOrders().then(() => {
+            this.overlay = false
+        })
     },
 };
 </script>

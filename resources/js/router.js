@@ -11,6 +11,7 @@ import Customer from './components/Customer'
 import OrderDetails from './components/OrderDetails'
 import SalesOrders from './components/SalesOrders'
 import StockInRequest from './components/StockInRequest'
+import SalesOrderRequest from './components/SalesOrderRequest'
 
 import store from './store'
 
@@ -62,6 +63,22 @@ export default new VueRouter({
             path: '/stock_in_request',
             name: 'stock_in_request',
             component : StockInRequest,
+            beforeEnter: (to, from, next) => {
+                console.log('store.state.loggedInUser', store.state.loggedInUser)
+                // replace `store.state.user` with your actual user state
+                if (store.state.loggedInUser.is_super_admin || store.state.loggedInUser.is_admin) {
+                  next(); // proceed to '/supply' if admin
+                  
+                } else {
+                    alert('Invalid Role!')
+                  next('/home'); // redirect to home if not admin
+                }
+            }
+        },
+        {
+            path: '/sales_order_request',
+            name: 'sales_order_request',
+            component : SalesOrderRequest,
             beforeEnter: (to, from, next) => {
                 console.log('store.state.loggedInUser', store.state.loggedInUser)
                 // replace `store.state.user` with your actual user state

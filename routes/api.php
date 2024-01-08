@@ -10,6 +10,8 @@ use App\Http\Controllers\SalesOrderController;
 use App\Http\Controllers\OrderDetailController;
 use App\Http\Controllers\SupplyStockInRequestController;
 use App\Http\Controllers\SupplyStockInRequestDetailController;
+use App\Http\Controllers\SalesOrderRequestController;
+use App\Http\Controllers\SalesOrderRequestDetailController;
 use App\Models\User;
 
 
@@ -48,6 +50,12 @@ use App\Models\User;
     Route::post('/stock_in_request/store', [SupplyStockInRequestController::class, 'store']);
     Route::post('/stock_in_request/update/{supplyStockInRequest}', [SupplyStockInRequestController::class, 'update']);
     Route::post('/stock_in_request/delete/{supplyStockInRequest}', [SupplyStockInRequestController::class, 'destroy']);
+
+    Route::get('/sales_order_requests', [SalesOrderRequestController::class, 'index']);
+    Route::get('/sales_order_requests/pending', [SalesOrderRequestController::class, 'pending']);
+    Route::post('/sales_order_request/store', [SalesOrderRequestController::class, 'store']);
+    Route::post('/sales_order_request/update/{salesOrderRequest}', [SalesOrderRequestController::class, 'update']);
+    Route::post('/sales_order_request/delete/{salesOrderRequest}', [SalesOrderRequestController::class, 'destroy']);
     
     Route::get('/suppliers', [SupplierController::class, 'index']);
     Route::post('/supplier/store', [SupplierController::class, 'store']);
