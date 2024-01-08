@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 
 use App\Models\Customer;
 use Illuminate\Http\Request;
+use Illuminate\Validation\Rule;
+use Illuminate\Database\QueryException;
 
 class CustomerController extends Controller
 {
@@ -18,24 +20,54 @@ class CustomerController extends Controller
         $customer = Customer::findOrFail($id);
         return response()->json($customer);
     }
-
+    
     public function store(Request $request)
     {
-        $customer = Customer::create($request->all());
-        return response()->json($customer, 201);
+        try {
+            $request->validate([
+                'name' => 'required',
+                'email' => ['required', 'email', Rule::unique('customers')->whereNull('deleted_at')],
+                'phone' => 'required',
+                'address' => 'required',
+                'auth_id' => 'required',
+            ]);
+    
+            $customer = new Customer;
+            $customer->name = $request->name;
+            $customer->email = $request->email;
+            $customer->phone = $request->phone;
+            $customer->address = $request->address;
+            $customer->created_by = $request->auth_id;
+            $customer->updated_by = $request->auth_id;
+            $customer->save();
+    
+            return response()->json($customer, 201);
+        } catch (QueryException $e) {
+            if ($e->getCode() == 23000) {
+                return response()->json(['error' => 'Email already exists'], 409);
+            }
+    
+            return response()->json(['error' => 'An error occurred while processing your request'], 500);
+        }
     }
+    
+    
 
-    public function update(Request $request, $id)
+    public function update(Request $request, Customer $customer)
     {
-        $customer = Customer::findOrFail($id);
-        $customer->update($request->all());
+        $customer->name = $request->name;
+        $customer->email = $request->email;
+        $customer->phone = $request->phone;
+        $customer->address = $request->address;
+        $customer->updated_by = $request->auth_id;
+        $customer->save();
         return response()->json($customer, 200);
     }
 
     public function destroy($id)
     {
         $customer = Customer::findOrFail($id);
-        $customer->delete();
+        $customer->forceDelete();
         return response()->json(null, 204);
     }
 }

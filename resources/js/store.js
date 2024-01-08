@@ -99,6 +99,8 @@ export default new Vuex.Store({
         SALES_ORDERS: [],
         ORDER_DETAILS: [],
         CUSTOMERS: [],
+        STOCK_IN_REQUEST: [],
+        PENDING_STOCK_IN_REQUEST: []
     },
 
     actions:{
@@ -168,6 +170,22 @@ export default new Vuex.Store({
               commit("_getCustomers", data);
             });
         },
+        _getStockInRequest({ commit }) {
+            axios({
+              method: "get",
+              url: "/api/stock_in_requests",
+            }).then(({ data }) => {
+              commit("_getStockInRequest", data);
+            });
+        },
+        _getPendingStockInRequest({ commit }) {
+            axios({
+              method: "get",
+              url: "/api/stock_in_requests/pending",
+            }).then(({ data }) => {
+              commit("_getPendingStockInRequest", data);
+            });
+        },
     },
 
     mutations:{
@@ -201,6 +219,14 @@ export default new Vuex.Store({
         },
         _getCustomers(state, payload) {
             state.CUSTOMERS = payload;
+        },
+        _getStockInRequest(state, payload) {
+            state.STOCK_IN_REQUEST = payload;
+        },
+        _getPendingStockInRequest(state, payload) {
+            state.PENDING_STOCK_IN_REQUEST = payload;
+            console.log('state.PENDING_STOCK_IN_REQUEST', state.PENDING_STOCK_IN_REQUEST)
+            console.log('payload', payload)
         },
     },
     getters:{},

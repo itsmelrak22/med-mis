@@ -1,0 +1,295 @@
+<template>
+    <v-container fluid>
+        <v-card>
+            <v-toolbar elevation="4" >
+                <v-container>STOCK IN REQUEST</v-container>
+                <v-card-text>
+                    <v-text-field
+                        v-model="search"
+                        append-icon="mdi-magnify"
+                        label="Search"
+                        hide-details
+                        outlined
+                        dense
+                    ></v-text-field>
+                </v-card-text>
+            </v-toolbar>
+        </v-card>
+
+        <v-card>
+            <v-card-text>
+                <v-data-table
+                    height="60vh"
+                    class="mainTable"
+                    :headers="headers"
+                    :items="STOCK_IN_REQUEST"
+                    :search="search"
+                >
+                <template v-slot:[`item.created_at`]="{ item }">
+                    {{ getFormattedDate(item.created_at) }}
+                </template>
+                <template v-slot:[`item.updated_at`]="{ item }">
+                    {{ getFormattedDate(item.updated_at) }}
+                </template>
+                <template v-slot:[`item.actions`]="{ item }">
+                    <v-tooltip top v-if="item.status == 'PENDING'">
+                        <template v-slot:activator="{ on, attrs }">
+                            <v-icon
+                                v-bind="attrs"
+                                v-on="on"
+                                small
+                                class="mr-2"
+                                @click="toggleUpdate(true , item)"
+                            >
+                                mdi-pencil
+                            </v-icon>
+                        </template>
+                        <span>Update Status</span>
+                    </v-tooltip>
+                </template>
+                    <template v-slot:no-data>
+                    <v-btn
+                        color="primary"
+                        @click="initialize"
+                    >
+                        Reset
+                    </v-btn>
+                </template>
+                </v-data-table>
+            </v-card-text>
+        </v-card>
+
+
+<!-- ################################# DIALOGS #################################-->
+        <!-- dialogUpdate Start -->
+        <v-dialog v-model="dialogUpdate" max-width="400" persistent>
+            <v-form id="Update" ref="Update" @submit.prevent="Update">
+                <v-card>
+                    <v-card-title> <span class="overline">Update Stock In Request</span> </v-card-title>
+                        <v-card-text>
+                            <v-row>
+                              <v-col cols="12">
+                                <v-text-field 
+                                    v-model="tempData.name"
+                                    outlined 
+                                    dense 
+                                    label="Name"
+                                    name="name" 
+                                    readonly
+                                > </v-text-field>
+                                <v-text-field 
+                                    v-model="tempData.quantity"
+                                    outlined 
+                                    dense 
+                                    label="Quantity"
+                                    name="quantity" 
+                                    readonly
+                                > </v-text-field>
+                                <v-text-field 
+                                    v-model="tempData.supplier"
+                                    outlined 
+                                    dense 
+                                    label="Supplier"
+                                    name="supplier"
+                                    readonly
+                                > </v-text-field>
+                                <v-text-field 
+                                    v-model="tempData.requested_by"
+                                    outlined 
+                                    dense 
+                                    label="Reqeuested By"
+                                    name="requested_by"
+                                    readonly
+                                > </v-text-field>
+                                <v-text-field 
+                                    v-model="tempData.requested_date"
+                                    outlined 
+                                    dense 
+                                    label="Requested Date"
+                                    name="requested_date" 
+                                    readonly
+                                > </v-text-field>
+                                <v-autocomplete
+                                    :items="['APPROVED', 'CANCELLED']"
+                                    outlined 
+                                    label="Status"
+                                    name="status" 
+                                    class="required"
+                                    clearable
+                                    :rules="rules.required"
+                                    dense
+                                ></v-autocomplete>
+                                <input type="hidden" name="auth_id" :value="loggedInUser.id">
+                                <input type="hidden" name="supply_id" :value="tempData.supply_id">
+                                <input type="hidden" name="supply_stock_in_request_detail_id" :value="tempData.supply_stock_in_request_detail_id">
+                                <input type="hidden" name="supply_stock_in_request_id" :value="tempData.supply_stock_in_request_id">
+                              </v-col>
+                            </v-row>
+                        </v-card-text>
+                    <v-card-actions>
+                        <v-spacer></v-spacer>
+                        <v-btn text @click="dialogUpdate = false">Cancel</v-btn>
+                        <v-btn text type="submit">Submit</v-btn>
+                    </v-card-actions>
+                </v-card>
+            </v-form>
+        </v-dialog>
+        <!-- dialogUpdate End -->
+
+   
+
+<!-- ################################# OVERLAY #################################-->
+        <v-overlay :value="overlay">
+            <v-progress-circular
+                indeterminate
+                size="64"
+            ></v-progress-circular>
+        </v-overlay>
+    </v-container>
+</template>
+
+<script>
+import { mapActions, mapState } from 'vuex';
+export default {
+    sockets: {
+
+    },
+    data(){
+        return {
+            dialogView: false,
+            dialogUpdate: false,
+            overlay: false,
+
+            headers: [
+                {
+                    text: 'Name',
+                    align: 'start',
+                    value: 'name',
+                },
+                {
+                    text: 'Request Quantity',
+                    align: 'start',
+                    value: 'quantity',
+                },
+                {
+                    text: 'Supplier',
+                    align: 'start',
+                    value: 'supplier',
+                },
+                {
+                    text: 'Status',
+                    align: 'start',
+                    value: 'status',
+                },
+                {
+                    text: 'Stock In Request Date',
+                    align: 'start',
+                    value: 'created_at',
+                },
+                {
+                    text: 'Requested By',
+                    align: 'start',
+                    value: 'requested_by',
+                },
+                {
+                    text: 'Last Updated Date',
+                    align: 'start',
+                    value: 'updated_at',
+                },
+                { text: 'Actions', value: 'actions', sortable: false, width: "10%" },
+            ],
+            search: '',
+            tempData: {},
+            tab: 0
+        }
+    },
+
+    computed:{
+        ...mapState([
+            'SUPPLIERS',
+            'SUPPLIES',
+            'rules',
+            'loggedInUser',
+            'STOCK_IN_REQUEST'
+        ]),
+    },
+
+    methods: {
+        ...mapActions([
+            '_getSuppliers',
+            '_getSupplies',
+            '_getStockInRequest'
+        ]),
+        async initialize(){
+            await this._getStockInRequest()
+        },
+        getFormattedDate(date) {
+            let newDate = new Date(date);
+            let year = newDate.getFullYear();
+            let month = (1 + newDate.getMonth()).toString().padStart(2, '0');
+            let day = newDate.getDate().toString().padStart(2, '0');
+        
+            return month + '/' + day + '/' + year;
+        },
+        toggleUpdate(isShow, object = {}){
+          if( ! isShow ) {
+              this.dialogUpdate = false;
+              this.tempData = {};
+              return;
+          }
+          if( ! Object.keys(object).length > 0 ) {
+              console.log( 'toggleUpdate', 'no data' );
+              return;
+          }
+
+			  this.dialogUpdate = isShow;
+            this.tempData = {...object};
+        },
+        toggleView(isShow, object = {}){
+          if( ! isShow ) {
+              this.dialogView = false;
+              this.tempData = {};
+              return;
+          }
+          if( ! Object.keys(object).length > 0 ) {
+              console.log( 'toggleUpdate', 'no data' );
+              return;
+          }
+
+            this.dialogView = isShow;
+            this.tempData = {...object};
+        },
+        Update(){
+            if(this.$refs.Update.validate()){
+                this.overlay = true;
+                const myForm = document.getElementById('Update');
+                const formdata = new FormData(myForm);
+
+                axios({
+                    method: 'POST',
+                    url: `/api/stock_in_request/update/${this.tempData.supply_stock_in_request_id}`,
+                    data: formdata
+                }).then(() => {
+                    this._getStockInRequest();
+                    this.$refs.Update.reset()
+                    this.toggleUpdate(false);
+                }).catch((err) => {
+                    console.log("ERROR __")
+                    console.err(err)
+                })
+                .finally(() => {
+                    this.overlay = false;
+                })
+            }
+        },
+    },
+
+    async mounted(){
+        this.overlay = true;
+        await this.initialize().then(() => {
+            this.overlay = false
+        })
+    }
+
+}
+</script>

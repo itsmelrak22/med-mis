@@ -1,26 +1,35 @@
 <template>
     <v-container fluid>
         <v-card>
-            <v-card-text>
-                <v-text-field
-                    v-model="search"
-                    append-icon="mdi-magnify"
-                    label="Search"
-                    hide-details
-                ></v-text-field>
-            </v-card-text>
+            <v-toolbar elevation="4" >
+                <v-container>SUPPLIES</v-container>
+                <v-card-text>
+                    <v-text-field
+                        v-model="search"
+                        append-icon="mdi-magnify"
+                        label="Search"
+                        hide-details
+                        outlined
+                        dense
+                    ></v-text-field>
+                </v-card-text>
+            </v-toolbar>
         </v-card>
 
         <v-card>
             <v-card-title>
                 <v-btn
+                    class="mx-1 my-1"
                     color="#34495E"
                     elevation="2"
                     raised
                     small
                     dark
                     @click="toggleStore(true)"
-                >Add Supply</v-btn>
+                >
+                    Request Supply Stock In
+                </v-btn>
+
             </v-card-title>
             <v-card-text>
                 <v-data-table
@@ -30,7 +39,13 @@
                     :items="SUPPLIES"
                     :search="search"
                 >
-                <template v-slot:[`item.actions`]="{ item }">
+                <template v-slot:[`item.created_at`]="{ item }">
+                    {{ getFormattedDate(item.created_at) }}
+                </template>
+                <template v-slot:[`item.updated_at`]="{ item }">
+                    {{ getFormattedDate(item.updated_at) }}
+                </template>
+                <!-- <template v-slot:[`item.actions`]="{ item }">
                     <v-icon
                         small
                         class="mr-2"
@@ -44,7 +59,7 @@
                     >
                         mdi-delete
                     </v-icon>
-                </template>
+                </template> -->
                     <template v-slot:no-data>
                     <v-btn
                         color="primary"
@@ -61,7 +76,6 @@
 <!-- ################################# DIALOGS #################################-->
         <!-- dialogStore Start -->
           <v-dialog v-model="dialogStore" max-width="400" persistent>
-            <v-form id="Store" ref="Store" @submit.prevent="Store">
                 <v-card>
                     <v-card-title> 
                       <span class="overline">Create New Supply</span> 
@@ -69,48 +83,119 @@
                     <v-card-text>
                         <v-row>
                             <v-col cols="12">
-                                <v-text-field 
-                                    outlined 
-                                    dense 
-                                    label="Name"
-                                    name="name" 
-                                    class="required"
-                                    :rules="rules.uniqueData(SUPPLIERS)"
-                                > </v-text-field>
-                                <v-autocomplete
-                                  :items="SUPPLIERS"
-                                  item-text="name"
-                                  item-value="id"
-                                  outlined 
-                                  label="Supplier"
-                                  name="supplier_id" 
-                                  class="required"
-                                  clearable
-                                  :rules="rules.required"
-                                  dense
-                                ></v-autocomplete>
-                                <v-autocomplete
-                                  :items="['ACTIVE', 'INACTIVE']"
-                                  outlined 
-                                  label="Status"
-                                  name="status" 
-                                  class="required"
-                                  clearable
-                                  :rules="rules.required"
-                                  dense
-                                ></v-autocomplete>
+                                <v-tabs v-model="tab" centered grow>
+                                    <v-tab>New</v-tab>
+                                    <v-tab>Existing</v-tab>
+                                </v-tabs>
+                                <v-tabs-items v-model="tab">
+                                    <v-tab-item>
+                                        <v-card-text>
+                                            <v-form id="Store" ref="Store" @submit.prevent="Store">
+                                                <v-text-field 
+                                                    outlined 
+                                                    dense 
+                                                    label="Name"
+                                                    name="name" 
+                                                    class="required"
+                                                    :rules="rules.uniqueData(SUPPLIERS)"
+                                                > </v-text-field>
+
+                                                <v-autocomplete
+                                                    :items="SUPPLIERS"
+                                                    item-text="name"
+                                                    item-value="id"
+                                                    outlined 
+                                                    label="Supplier"
+                                                    name="supplier_id" 
+                                                    class="required"
+                                                    clearable
+                                                    :rules="rules.required"
+                                                    dense
+                                                ></v-autocomplete>
+
+                                                <v-text-field 
+                                                    outlined 
+                                                    dense 
+                                                    label="Quantity"
+                                                    name="quantity" 
+                                                    class="required"
+                                                    type="number"
+                                                    :rules="[v => !isNaN(parseFloat(v)) && v > 0 || 'Input must be a number greater than 0']"
+                                                > </v-text-field>
+
+                                                <input type="hidden" name="auth_id" :value="loggedInUser.id">
+                                                <input type="hidden" name="stock_in_type" value="new">
+
+                                                <v-card-actions>
+                                                    <v-spacer></v-spacer>
+                                                    <v-btn text @click="dialogStore = false">Cancel</v-btn>
+                                                    <v-btn text type="submit">Submit</v-btn>
+                                                </v-card-actions>
+                                            </v-form>
+                                        </v-card-text>
+                                    </v-tab-item>
+                                    <v-tab-item>
+                                        <v-card-text>
+                                            <v-form id="StoreExist" ref="StoreExist" @submit.prevent="StoreExist">
+                                                <v-autocomplete
+                                                    v-model="tempData.id"
+                                                    :items="SUPPLIES"
+                                                    item-value="id"
+                                                    item-text="name"
+                                                    outlined 
+                                                    dense 
+                                                    label="Name"
+                                                    name="id" 
+                                                    class="required"
+                                                    :rules="rules.uniqueData(SUPPLIERS)"
+                                                    @change="setSupplierInfo(tempData.id)"
+                                                > </v-autocomplete>
+
+                                                <v-autocomplete
+                                                    v-model="tempData.supplier_id"
+                                                    :items="SUPPLIERS"
+                                                    item-text="name"
+                                                    item-value="id"
+                                                    outlined 
+                                                    label="Supplier"
+                                                    name="supplier_id" 
+                                                    class="required"
+                                                    clearable
+                                                    :rules="rules.required"
+                                                    dense
+                                                    :disabled="true"
+                                                ></v-autocomplete>
+
+                                                <v-text-field 
+                                                    outlined 
+                                                    dense 
+                                                    label="Quantity"
+                                                    name="quantity" 
+                                                    class="required"
+                                                    type="number"
+                                                    :rules="[v => !isNaN(parseFloat(v)) && v > 0 || 'Input must be a number greater than 0']"
+                                                    :disabled="!tempData.id"
+                                                > </v-text-field>
+
+                                                <input type="hidden" name="auth_id" :value="loggedInUser.id">
+                                                <input type="hidden" name="stock_in_type" value="existing">
+                                                <input type="hidden" name="supply_name" :value="tempData.name">
+
+                                                <v-card-actions>
+                                                    <v-spacer></v-spacer>
+                                                    <v-btn text @click="dialogStore = false">Cancel</v-btn>
+                                                    <v-btn text type="submit">Submit</v-btn>
+                                                </v-card-actions>
+                                            </v-form>
+                                        </v-card-text>
+                                    </v-tab-item>
+                                </v-tabs-items>
                                 
-                                <input type="hidden" name="auth_id" :value="loggedInUser.id">
                             </v-col>
                         </v-row>
                     </v-card-text>
-                    <v-card-actions>
-                        <v-spacer></v-spacer>
-                        <v-btn text @click="dialogStore = false">Cancel</v-btn>
-                        <v-btn text type="submit">Submit</v-btn>
-                    </v-card-actions>
+                    
                 </v-card>
-            </v-form>
           </v-dialog>
         <!-- dialogStore End -->
 
@@ -145,7 +230,7 @@
                                     outlined 
                                     dense 
                                     label="Address"
-                                    name="address" 
+                                    name="address"
                                     class="required"
                                     :rules="rules.required"
                                 > </v-text-field>
@@ -224,6 +309,11 @@ export default {
                     value: 'name',
                 },
                 {
+                    text: 'Stock Quantity',
+                    align: 'start',
+                    value: 'quantity',
+                },
+                {
                     text: 'Supplier',
                     align: 'start',
                     value: 'supplier',
@@ -233,10 +323,21 @@ export default {
                     align: 'start',
                     value: 'status',
                 },
-                { text: 'Actions', value: 'actions', sortable: false, width: "10%" },
+                {
+                    text: 'Stock In Date',
+                    align: 'start',
+                    value: 'created_at',
+                },
+                {
+                    text: 'Last Updated Date',
+                    align: 'start',
+                    value: 'updated_at',
+                },
+                // { text: 'Actions', value: 'actions', sortable: false, width: "10%" },
             ],
             search: '',
-            tempData: {}
+            tempData: {},
+            tab: 0
         }
     },
 
@@ -253,10 +354,20 @@ export default {
       ...mapActions([
           '_getSuppliers',
           '_getSupplies',
+          '_getPendingStockInRequest'
       ]),
       async initialize(){
           await this._getSuppliers()
           await this._getSupplies()
+      },
+      setSupplierInfo(id){
+        const supply = this.SUPPLIES.find(res => res.id == id);
+        if(supply.id){
+            this.tempData = supply
+            this.tempData.supplier_id = +this.tempData.supplier_id
+            console.log('this.tempData', this.tempData)
+        }
+
       },
       toggleStore(isShow){
         this.dialogStore = isShow;
@@ -273,8 +384,8 @@ export default {
           }
 
 			  this.dialogUpdate = isShow;
-        this.tempData = {...object};
-		  },
+            this.tempData = {...object};
+        },
         toggleDelete(isShow, object = {}){
             if( ! isShow ) {
                 this.dialogDelete = false;
@@ -301,7 +412,32 @@ export default {
                     data: formdata
                 }).then(() => {
                     this._getSupplies();
+                    this._getPendingStockInRequest();
                     this.$refs.Store.reset()
+                    this.toggleStore(false);
+                }).catch((err) => {
+                    console.log("ERROR __")
+                    console.err(err)
+                })
+                .finally(() => {
+                    this.overlay = false;
+                })
+            }
+        },
+        StoreExist(){
+            if(this.$refs.StoreExist.validate()){
+                this.overlay = true;
+                const myForm = document.getElementById('StoreExist');
+                const formdata = new FormData(myForm);
+
+                axios({
+                    method: 'POST',
+                    url: `/api/supply/store/exist/${this.tempData.id}`,
+                    data: formdata
+                }).then(() => {
+                    this._getSupplies();
+                    this._getPendingStockInRequest();
+                    this.$refs.StoreExist.reset()
                     this.toggleStore(false);
                 }).catch((err) => {
                     console.log("ERROR __")
@@ -358,6 +494,14 @@ export default {
                 })
             }
         },
+        getFormattedDate(date) {
+            let newDate = new Date(date);
+            let year = newDate.getFullYear();
+            let month = (1 + newDate.getMonth()).toString().padStart(2, '0');
+            let day = newDate.getDate().toString().padStart(2, '0');
+        
+            return month + '/' + day + '/' + year;
+        }
     },
 
     async mounted(){

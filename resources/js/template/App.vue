@@ -15,7 +15,29 @@
                      <v-icon>{{ item.icon }}</v-icon>
                   </v-list-item-icon>
                   <v-list-item-content>
-                     <v-list-item-title>{{ item.text }}</v-list-item-title>
+                     <v-list-item-title>
+                           <v-badge v-if="item.to == 'stock_in_request' && PENDING_STOCK_IN_REQUEST.length" color="green" :content="PENDING_STOCK_IN_REQUEST.length"> <div>{{ item.text }}</div> </v-badge> 
+                        <div v-else color="white">{{ item.text }} </div> 
+                     </v-list-item-title>
+                  </v-list-item-content>
+               </v-list-item>
+         </v-list>
+         <v-list dense>
+            <v-divider></v-divider>
+            <v-subheader>ADMIN ACCESS:</v-subheader>
+               <v-list-item
+                  v-for="(item, i) in adminItems"
+                  :key="i"
+                  :to="item.to"
+               >
+                  <v-list-item-icon>
+                     <v-icon>{{ item.icon }}</v-icon>
+                  </v-list-item-icon>
+                  <v-list-item-content>
+                     <v-list-item-title>
+                           <v-badge v-if="item.to == 'stock_in_request' && PENDING_STOCK_IN_REQUEST.length" color="green" :content="PENDING_STOCK_IN_REQUEST.length"> <div>{{ item.text }}</div> </v-badge> 
+                        <div v-else color="white">{{ item.text }} </div> 
+                     </v-list-item-title>
                   </v-list-item-content>
                </v-list-item>
          </v-list>
@@ -122,19 +144,24 @@
 </template>
 
 <script>
-import {mapState} from 'vuex';
+import {mapActions, mapState} from 'vuex';
    export default {
       data: () => ({
          drawer: null,
          items:[
-            {text:'Home', icon:'mdi-home', to:'home'},
+            // {text:'Home', icon:'mdi-home', to:'home'},
             {text:'Supplies', icon:'mdi-hand-wave', to:'supply'},
-            {text: 'Suppliers', icon: 'mdi-account-group', to : 'supplier'},
             {text: 'Sales', icon: 'mdi-account-group', to : 'sale'},
+            {text: 'Sales Orders', icon: 'mdi-account', to : 'sales_orders'},
+            // {text: 'Order Details', icon: 'mdi-account', to : 'order_details'},
+
+         ],
+         adminItems: [
+            //Admin Access
+            {text:'Supply Stock In Request', icon:'mdi-hand-wave', to:'stock_in_request'},
+            {text: 'Suppliers', icon: 'mdi-account-group', to : 'supplier'},
             {text: 'Users', icon: 'mdi-account', to : 'user'},
             {text: 'Customers', icon: 'mdi-account', to : 'customer'},
-            {text: 'Sales Orders', icon: 'mdi-account', to : 'sales_orders'},
-            {text: 'Order Details', icon: 'mdi-account', to : 'order_details'},
          ],
          csrf: document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
          dialogChangePassword: false,
@@ -143,12 +170,28 @@ import {mapState} from 'vuex';
             confirmPassword: ''
          },
          showConfirmPassword: false,
-         showPassword: false
+         showPassword: false,
 
 
       }),
+      computed: {
+         ...mapState([
+            'loggedInUser',
+            'rules',
+            'PENDING_STOCK_IN_REQUEST'
+         ])
+
+      },
 
       methods: {
+         ...mapActions([
+            '_getPendingStockInRequest'
+         ]),
+
+          async initialize(){
+           
+         },
+
          ChangePassword(){
             if(this.$refs.ChangePassword.validate()){
                const myForm = document.getElementById('ChangePassword');
@@ -189,20 +232,16 @@ import {mapState} from 'vuex';
                 })
          }
       },
+      async mounted() {
+         await this._getPendingStockInRequest()
 
-      computed: {
-         ...mapState([
-            'loggedInUser',
-            'rules'
-         ])
-
-      },
-
-      mounted() {
          const { is_password_already_reset } = this.loggedInUser;
          if( ! +is_password_already_reset ){
             this.dialogChangePassword = true;
          }
+
+         
+
       }
    }
 </script>

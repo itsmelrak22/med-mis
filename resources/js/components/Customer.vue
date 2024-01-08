@@ -52,7 +52,7 @@
         <!-- Customer Dialogs -->
         <!-- dialogCustomerStore Start -->
         <v-dialog v-model="dialogCustomerStore" max-width="400" persistent>
-            <v-form id="CustomerStore" ref="CustomerStore" @submit.prevent="storeCustomer">
+            <v-form id="Store" ref="Store" @submit.prevent="Store">
                 <v-card>
                     <v-card-title> 
                       <span class="overline">Create New Customer Data</span> 
@@ -81,12 +81,16 @@
                                     dense 
                                     label="Phone"
                                     name="phone" 
+                                    class="required"
+                                    :rules="rules.required"
                                 > </v-text-field>
                                 <v-text-field 
                                     outlined 
                                     dense 
                                     label="Address"
                                     name="address" 
+                                    class="required"
+                                    :rules="rules.required"
                                 > </v-text-field>
 
                                 <input type="hidden" name="auth_id" :value="loggedInUser.id">
@@ -104,22 +108,84 @@
         <!-- dialogCustomerStore End -->
 
         <!-- dialogCustomerUpdate Start -->
-        <v-dialog v-model="dialogCustomerUpdate" max-width="300" persistent>
-            <v-form id="CustomerUpdate" ref="CustomerUpdate" @submit.prevent="updateCustomer">
-                <!-- ... (existing customer update form code) ... -->
+        <v-dialog v-model="dialogCustomerUpdate" max-width="400" persistent>
+            <v-form id="Update" ref="Update" @submit.prevent="Update">
+                <v-card>
+                    <v-card-title> <span class="overline">Update Customer</span> </v-card-title>
+                        <v-card-text>
+                            <v-row>
+                              <v-col cols="12">
+                                <v-text-field 
+                                    v-model="tempData.name"
+                                    outlined 
+                                    dense 
+                                    label="Name"
+                                    name="name" 
+                                    class="required"
+                                    :rules="rules.required"
+                                > </v-text-field>
+                                <v-text-field 
+                                    v-model="tempData.email"
+                                    outlined 
+                                    dense 
+                                    label="Email"
+                                    name="email" 
+                                    class="required"
+                                    :rules="rules.uniqueData(CUSTOMERS)"
+                                > </v-text-field>
+                                <v-text-field 
+                                    v-model="tempData.phone"
+                                    outlined 
+                                    dense 
+                                    label="Phone"
+                                    name="phone" 
+                                    class="required"
+                                    :rules="rules.required"
+                                > </v-text-field>
+                                <v-text-field 
+                                    v-model="tempData.address"
+                                    outlined 
+                                    dense 
+                                    label="Address"
+                                    name="address" 
+                                    class="required"
+                                    :rules="rules.required"
+                                > </v-text-field>
+                                <input type="hidden" name="auth_id" :value="loggedInUser.id">
+                              </v-col>
+                            </v-row>
+                        </v-card-text>
+                    <v-card-actions>
+                        <v-spacer></v-spacer>
+                        <v-btn text @click="dialogCustomerUpdate = false">Cancel</v-btn>
+                        <v-btn text type="submit">Submit</v-btn>
+                    </v-card-actions>
+                </v-card>
             </v-form>
         </v-dialog>
         <!-- dialogCustomerUpdate End -->
 
         <!-- dialogCustomerDelete Start -->
-        <v-dialog v-model="dialogCustomerDelete" max-width="300" persistent>
-            <v-form id="CustomerDelete" ref="CustomerDelete" @submit.prevent="deleteCustomer">
-                <!-- ... (existing customer delete form code) ... -->
+        <v-dialog v-model="dialogCustomerDelete" max-width="400" persistent>
+            <v-form id="Delete" ref="Delete" @submit.prevent="Delete">
+                <v-card>
+                    <v-card-title> <span class="overline">Delete Customer</span> </v-card-title>
+                        <v-card-text>
+                            <v-row>
+                                <v-col cols="12">
+                                    <p class="overline">CONFIRM DELETE Customer?</p>
+                                </v-col>
+                            </v-row>
+                        </v-card-text>
+                    <v-card-actions>
+                        <v-spacer></v-spacer>
+                        <v-btn text @click="dialogCustomerDelete = false">Cancel</v-btn>
+                        <v-btn text type="submit">Submit</v-btn>
+                    </v-card-actions>
+                </v-card>
             </v-form>
         </v-dialog>
         <!-- dialogCustomerDelete End -->
-
-        <!-- ... (existing code) ... -->
     </v-container>
 </template>
 
@@ -176,19 +242,101 @@ export default {
             this.dialogCustomerStore = isShow;
         },
         toggleCustomerUpdate(isShow, object = {}) {
-            // ... (existing code) ...
+            if( ! isShow ) {
+                this.dialogCustomerUpdate = false;
+                this.tempData = {};
+                return;
+            }
+            if( ! Object.keys(object).length > 0 ) {
+                console.log( 'toggleUpdate', 'no data' );
+                return;
+            }
+
+			this.dialogCustomerUpdate = isShow;
+            this.tempData = {...object};
         },
-        toggleCustomerDelete(isShow, object = {}) {
-            // ... (existing code) ...
+        toggleCustomerDelete(isShow, object = {}){
+            if( ! isShow ) {
+                this.dialogCustomerDelete = false;
+                this.tempData = {};
+                return;
+            }
+            if( ! Object.keys(object).length > 0 ) {
+                console.log( 'toggleDelete', 'no data' );
+                return;
+            }
+
+			this.dialogCustomerDelete = isShow;
+            this.tempData = {...object};
+		},
+        Store(){
+            if(this.$refs.Store.validate()){
+                this.overlay = true;
+                const myForm = document.getElementById('Store');
+                const formdata = new FormData(myForm);
+
+                axios({
+                    method: 'POST',
+                    url: '/api/customers',
+                    data: formdata
+                }).then(() => {
+                    this._getCustomers();
+                    this.$refs.Store.reset()
+                    this.toggleCustomerStore(false);
+                }).catch((err) => {
+                    console.log("ERROR __")
+                    console.err(err)
+                })
+                .finally(() => {
+                    this.overlay = false;
+                })
+            }
         },
-        storeCustomer() {
-            // ... (existing code) ...
+        Update() {
+            if(this.$refs.Update.validate()){
+                this.overlay = true;
+                const myForm = document.getElementById('Update');
+                const formdata = new FormData(myForm);
+
+                axios({
+                    method: 'POST',
+                    url: `/api/customer/${this.tempData.id}`,
+                    data: formdata
+                }).then(() => {
+                    this._getCustomers();
+                    this.$refs.Update.reset()
+                    this.toggleCustomerUpdate(false);
+                }).catch((err) => {
+                    console.log("ERROR __")
+                    console.err(err)
+                })
+                .finally(() => {
+                    this.overlay = false;
+                })
+            }
         },
-        updateCustomer() {
-            // ... (existing code) ...
-        },
-        deleteCustomer() {
-            // ... (existing code) ...
+        Delete() {
+            if(this.$refs.Delete.validate()){
+                this.overlay = true;
+                const myForm = document.getElementById('Delete');
+                const formdata = new FormData(myForm);
+
+                axios({
+                    method: 'POST',
+                    url: `/api/customer/delete/${this.tempData.id}`,
+                    data: formdata
+                }).then(() => {
+                    this._getCustomers();
+                    this.$refs.Delete.reset()
+                    this.toggleCustomerDelete(false);
+                }).catch((err) => {
+                    console.log("ERROR __")
+                    console.err(err)
+                })
+                .finally(() => {
+                    this.overlay = false;
+                })
+            }
         },
         // ... (existing methods) ...
     },

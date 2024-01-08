@@ -8,6 +8,8 @@ use App\Http\Controllers\SupplierController;
 use App\Http\Controllers\CustomerController;
 use App\Http\Controllers\SalesOrderController;
 use App\Http\Controllers\OrderDetailController;
+use App\Http\Controllers\SupplyStockInRequestController;
+use App\Http\Controllers\SupplyStockInRequestDetailController;
 use App\Models\User;
 
 
@@ -37,8 +39,15 @@ use App\Models\User;
 
     Route::get('/supplies', [SupplyController::class, 'index']);
     Route::post('/supply/store', [SupplyController::class, 'store']);
+    Route::post('/supply/store/exist/{supply}', [SupplyController::class, 'store_exist']);
     Route::post('/supply/update/{supply}', [SupplyController::class, 'update']);
     Route::post('/supply/delete/{supply}', [SupplyController::class, 'destroy']);
+
+    Route::get('/stock_in_requests', [SupplyStockInRequestController::class, 'index']);
+    Route::get('/stock_in_requests/pending', [SupplyStockInRequestController::class, 'pending']);
+    Route::post('/stock_in_request/store', [SupplyStockInRequestController::class, 'store']);
+    Route::post('/stock_in_request/update/{supplyStockInRequest}', [SupplyStockInRequestController::class, 'update']);
+    Route::post('/stock_in_request/delete/{supplyStockInRequest}', [SupplyStockInRequestController::class, 'destroy']);
     
     Route::get('/suppliers', [SupplierController::class, 'index']);
     Route::post('/supplier/store', [SupplierController::class, 'store']);
@@ -48,8 +57,8 @@ use App\Models\User;
     Route::get('customers', [CustomerController::class, 'index']);
     Route::get('customers/{id}', [CustomerController::class, 'show']);
     Route::post('customers', [CustomerController::class, 'store']);
-    Route::put('customers/{id}', [CustomerController::class, 'update']);
-    Route::delete('customers/{id}', [CustomerController::class, 'destroy']);
+    Route::post('customer/{customer}', [CustomerController::class, 'update']);
+    Route::post('customer/delete/{id}', [CustomerController::class, 'destroy']);
 
     // Sales Orders routes
     Route::get('sales_orders', [SalesOrderController::class, 'index']);

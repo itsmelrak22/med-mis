@@ -3,6 +3,8 @@
 namespace App\Http\Controllers;
 
 use App\Models\Supply;
+use App\Models\SupplyStockInRequest;
+use App\Models\SupplyStockInRequestDetail;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
@@ -16,7 +18,7 @@ class SupplyController extends Controller
      */
     public function index()
     {
-        return Supply::GET_ALL_BY_DESC();
+        return Supply::GET_ALL_ACTIVE_BY_DESC();
     }
 
     /**
@@ -27,22 +29,72 @@ class SupplyController extends Controller
      */
     public function store(Request $request)
     {
+
+        // return $request;
         try {
-            DB::beginTransaction();
-                $supply              = new Supply();
+            \DB::beginTransaction();
+                $supply              = new Supply;
                 $supply->name        = $request->name;
                 $supply->supplier_id = $request->supplier_id;
-                $supply->status      = $request->status;
-                $supply->created_by  = $request->auth_id;
+                $supply->status      = "INACTIVE";
                 $supply->updated_by  = $request->auth_id;
+                $supply->updated_at = new \DateTime;
                 $supply->save();
-            DB::commit();
+                $supply_id = $supply->id;
 
-            return 'success';
+                $supply_stock_in_request                    =   new SupplyStockInRequest();
+                $supply_stock_in_request->status            =   "PENDING"; // PENDING, APPROVED, CANCELLED;
+                $supply_stock_in_request->created_by        =   $request->auth_id;
+                $supply_stock_in_request->updated_by        =   $request->auth_id;
+                $supply_stock_in_request->save();
+                $supply_stock_in_request_id = $supply_stock_in_request->id;
+
+                $supply_stock_in_request_detail                                 =   new SupplyStockInRequestDetail();
+                $supply_stock_in_request_detail->supply_stock_in_request_id     =   $supply_stock_in_request_id;
+                $supply_stock_in_request_detail->supply_id                      =   $supply_id;
+                $supply_stock_in_request_detail->quantity                       =   $request->quantity;
+                $supply_stock_in_request_detail->save();
+
+
+
         } catch (\Exception $e) {
-            DB::rollBack();
+            \DB::rollBack();
             return $e->getMessage();
         }
+
+        \DB::commit();
+        return 'success';
+
+    }
+    public function store_exist(Request $request, Supply $supply)
+    {
+        try {
+            \DB::beginTransaction();
+                $supply_id = $supply->id;
+
+                $supply_stock_in_request                    =   new SupplyStockInRequest();
+                $supply_stock_in_request->status            =   "PENDING"; // PENDING, APPROVED, CANCELLED;
+                $supply_stock_in_request->created_by        =   $request->auth_id;
+                $supply_stock_in_request->updated_by        =   $request->auth_id;
+                $supply_stock_in_request->save();
+                $supply_stock_in_request_id = $supply_stock_in_request->id;
+
+                $supply_stock_in_request_detail                                 =   new SupplyStockInRequestDetail();
+                $supply_stock_in_request_detail->supply_stock_in_request_id     =   $supply_stock_in_request_id;
+                $supply_stock_in_request_detail->supply_id                      =   $supply_id;
+                $supply_stock_in_request_detail->quantity                       =   $request->quantity;
+                $supply_stock_in_request_detail->save();
+
+
+
+        } catch (\Exception $e) {
+            \DB::rollBack();
+            return $e->getMessage();
+        }
+
+        \DB::commit();
+        return 'success';
+
     }
 
     /**

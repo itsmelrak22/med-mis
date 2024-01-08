@@ -10,6 +10,7 @@ import User from './components/User'
 import Customer from './components/Customer'
 import OrderDetails from './components/OrderDetails'
 import SalesOrders from './components/SalesOrders'
+import StockInRequest from './components/StockInRequest'
 
 import store from './store'
 
@@ -27,14 +28,19 @@ export default new VueRouter({
             component: Supply
         },
         {
-            path: '/supplier',
-            name: 'supplier',
-            component : Supplier
-        },
-        {
             path: '/sale',
             name: 'sale',
             component : Sales
+        },
+        {
+            path: '/order_details',
+            name: 'order_details',
+            component : OrderDetails
+        },
+        {
+            path: '/sales_orders',
+            name: 'sales_orders',
+            component : SalesOrders
         },
         {
             path: '/user',
@@ -53,19 +59,52 @@ export default new VueRouter({
             }
         },
         {
+            path: '/stock_in_request',
+            name: 'stock_in_request',
+            component : StockInRequest,
+            beforeEnter: (to, from, next) => {
+                console.log('store.state.loggedInUser', store.state.loggedInUser)
+                // replace `store.state.user` with your actual user state
+                if (store.state.loggedInUser.is_super_admin || store.state.loggedInUser.is_admin) {
+                  next(); // proceed to '/supply' if admin
+                  
+                } else {
+                    alert('Invalid Role!')
+                  next('/home'); // redirect to home if not admin
+                }
+            }
+        },
+        {
             path: '/customer',
             name: 'customer',
-            component : Customer
+            component : Customer,
+            beforeEnter: (to, from, next) => {
+                console.log('store.state.loggedInUser', store.state.loggedInUser)
+                // replace `store.state.user` with your actual user state
+                if (store.state.loggedInUser.is_super_admin || store.state.loggedInUser.is_admin) {
+                  next(); // proceed to '/supply' if admin
+                  
+                } else {
+                    alert('Invalid Role!')
+                  next('/home'); // redirect to home if not admin
+                }
+            }
         },
         {
-            path: '/order_details',
-            name: 'order_details',
-            component : OrderDetails
-        },
-        {
-            path: '/sales_orders',
-            name: 'sales_orders',
-            component : SalesOrders
+            path: '/supplier',
+            name: 'supplier',
+            component : Supplier,
+            beforeEnter: (to, from, next) => {
+                console.log('store.state.loggedInUser', store.state.loggedInUser)
+                // replace `store.state.user` with your actual user state
+                if (store.state.loggedInUser.is_super_admin || store.state.loggedInUser.is_admin) {
+                  next(); // proceed to '/supply' if admin
+                  
+                } else {
+                    alert('Invalid Role!')
+                  next('/home'); // redirect to home if not admin
+                }
+            }
         },
 
       
