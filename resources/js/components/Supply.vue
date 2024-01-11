@@ -93,6 +93,15 @@
                                                 <v-text-field 
                                                     outlined 
                                                     dense 
+                                                    label="Serial Number"
+                                                    name="serial_number" 
+                                                    class="required"
+                                                    :rules="rules.uniqueSerialNumber(SUPPLIES)"
+                                                > </v-text-field>
+
+                                                <v-text-field 
+                                                    outlined 
+                                                    dense 
                                                     label="Name"
                                                     name="name" 
                                                     class="required"
@@ -302,6 +311,11 @@ export default {
             overlay: false,
 
             headers: [
+                {
+                    text: 'Serial Number',
+                    align: 'start',
+                    value: 'serial_number',
+                },
                 {
                     text: 'Name',
                     align: 'start',

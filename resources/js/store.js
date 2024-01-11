@@ -92,6 +92,15 @@ export default new Vuex.Store({
                     "already exists.",
                 ];
             },
+            uniqueSerialNumber(list) {
+                return [
+                    (v) => !!v || "Field is required",
+                    (v) => 
+                        // console.log(typeof _.find(list, {name : v}) === 'object', list, v)
+                        typeof _.find(list, {serial_number : v}) === 'undefined' ||
+                        "Serial Number already exists.",
+                ];
+            },
         },
         SUPPLIERS: [],
         SUPPLIES: [],

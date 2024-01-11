@@ -33,12 +33,13 @@ class SupplyController extends Controller
         // return $request;
         try {
             \DB::beginTransaction();
-                $supply              = new Supply;
-                $supply->name        = $request->name;
-                $supply->supplier_id = $request->supplier_id;
-                $supply->status      = "INACTIVE";
-                $supply->updated_by  = $request->auth_id;
-                $supply->updated_at = new \DateTime;
+                $supply                     = new Supply;
+                $supply->serial_number      = $request->serial_number;
+                $supply->name               = $request->name;
+                $supply->supplier_id        = $request->supplier_id;
+                $supply->status             = "INACTIVE";
+                $supply->updated_by         = $request->auth_id;
+                $supply->updated_at         = new \DateTime;
                 $supply->save();
                 $supply_id = $supply->id;
 
