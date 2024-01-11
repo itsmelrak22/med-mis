@@ -112,6 +112,12 @@ export default new Vuex.Store({
         PENDING_STOCK_IN_REQUEST: [],
         SALES_ORDER_REQUEST: [],
         PENDING_SALES_ORDER_REQUEST: [],
+        inventoryCount: 0,
+        pendingCount: 0,
+        pendingSalesOrderRequest: 0,
+        SUPPLIES_CRITICAL: [],
+        criticalSupplies: 0
+
     },
 
     actions:{
@@ -213,6 +219,23 @@ export default new Vuex.Store({
               commit("_getPendingSalesOrderRequests", data);
             });
         },
+        _getStockInRequestPending({ commit }) {
+            axios({
+              method: "get",
+              url: "/api/stock_in_requests",
+            }).then(({ data }) => {
+              commit("_getStockInRequestPending", data);
+            });
+        },
+        _getSuppliesCritical({ commit }) {
+            axios({
+              method: "get",
+              url: "/api/supplies/critical",
+            }).then(({ data }) => {
+              commit("_getSuppliesCritical", data);
+            });
+        },
+
     },
 
     mutations:{
@@ -234,6 +257,7 @@ export default new Vuex.Store({
         },
         _getSupplies( state, payload ){
             state.SUPPLIES = payload;
+            state.inventoryCount = payload.length
         },
         _getUsers( state, payload ){
             state.USERS = payload;
@@ -252,12 +276,18 @@ export default new Vuex.Store({
         },
         _getPendingStockInRequest(state, payload) {
             state.PENDING_STOCK_IN_REQUEST = payload;
+            state.pendingCount = payload.length
         },
         _getSalesOrderRequests(state, payload) {
             state.SALES_ORDER_REQUEST = payload;
         },
         _getPendingSalesOrderRequests(state, payload) {
             state.PENDING_SALES_ORDER_REQUEST = payload;
+            state.pendingSalesOrderRequest = payload.length;
+        },
+        _getSuppliesCritical(state, payload) {
+            state.SUPPLIES_CRITICAL = payload;
+            state.criticalSupplies = payload.length;
         },
     },
     getters:{},

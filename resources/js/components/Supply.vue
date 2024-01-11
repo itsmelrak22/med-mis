@@ -1,80 +1,136 @@
 <template>
     <v-container fluid>
-        <v-card>
-            <v-toolbar elevation="4" >
-                <v-container>SUPPLY INVENTORY</v-container>
-                <v-card-text>
-                    <v-text-field
-                        v-model="search"
-                        append-icon="mdi-magnify"
-                        label="Search"
-                        hide-details
-                        outlined
-                        dense
-                    ></v-text-field>
-                </v-card-text>
-            </v-toolbar>
-        </v-card>
-        <v-card>
-            <v-card-title>
-                <v-btn
-                    class="mx-1 my-1"
-                    color="#34495E"
-                    elevation="2"
-                    raised
-                    small
-                    dark
-                    @click="toggleStore(true)"
-                >
-                    Request Supply Stock-In
-                </v-btn>
+        <v-container>
+            <v-card >
+                <v-toolbar elevation="4" >
+                    <v-container>SUPPLY INVENTORY</v-container>
+                    <v-card-text>
+                        <v-text-field
+                            v-model="search"
+                            append-icon="mdi-magnify"
+                            label="Search"
+                            hide-details
+                            outlined
+                            dense
+                        ></v-text-field>
 
-            </v-card-title>
-            <v-card-text>
-                <v-data-table
-                    height="60vh"
-                    class="mainTable"
-                    :headers="headers"
-                    :items="SUPPLIES"
-                    :search="search"
-                >
-                <template v-slot:[`item.created_at`]="{ item }">
-                    {{ getFormattedDate(item.created_at) }}
-                </template>
-                <template v-slot:[`item.updated_at`]="{ item }">
-                    {{ getFormattedDate(item.updated_at) }}
-                </template>
-                <!-- <template v-slot:[`item.actions`]="{ item }">
-                    <v-icon
-                        small
-                        class="mr-2"
-                        @click="toggleUpdate(true , item)"
-                    >
-                        mdi-pencil
-                    </v-icon>
-                    <v-icon
-                        small
-                        @click="toggleDelete(true , item)"
-                    >
-                        mdi-delete
-                    </v-icon>
-                </template> -->
-                    <template v-slot:no-data>
+                    </v-card-text>
+                </v-toolbar>
+            </v-card>
+        </v-container>
+
+        <v-container>
+            <v-card>
+                <v-row>
+                    <v-col class="mx-2">
+                        <v-alert
+                            border="left"
+                            color="indigo"
+                            dark
+                            max-width="200"
+                            >
+                            Inventory : {{ inventoryCount }}
+                        </v-alert>
+                    </v-col>
+                    <v-col class="mx-2">
+                        <v-alert
+                            border="left"
+                            color="green"
+                            dark
+                            max-width="200"
+                            >
+                            Transaction : {{ pendingSalesOrderRequest }}
+
+                        </v-alert>
+                    </v-col>
+                    <v-col class="mx-2">
+                        <v-alert
+                            border="left"
+                            color="orange"
+                            dark
+                            max-width="200"
+                            >
+                            Pending : {{ pendingCount }}
+
+                        </v-alert>
+                    </v-col>
+                    <v-col class="mx-2">
+                        <v-alert
+                            border="left"
+                            color="red"
+                            dark
+                            max-width="200"
+                            >
+                            Critical : {{ criticalSupplies }}
+
+                        </v-alert>
+                    </v-col>
+                </v-row>
+            </v-card>
+        </v-container>
+
+        <v-container>
+            <v-card>
+                <v-card-title>
                     <v-btn
-                        color="primary"
-                        @click="initialize"
+                        class="mx-1 my-1"
+                        color="#34495E"
+                        elevation="2"
+                        raised
+                        small
+                        dark
+                        @click="toggleStore(true)"
                     >
-                        Reset
+                        Request Supply Stock-In
                     </v-btn>
-                </template>
-                </v-data-table>
-            </v-card-text>
-        </v-card>
+
+                </v-card-title>
+                <v-card-text>
+                    <v-data-table
+                        height="60vh"
+                        class="mainTable"
+                        :headers="headers"
+                        :items="SUPPLIES"
+                        :search="search"
+                    >
+                    <template v-slot:[`item.created_at`]="{ item }">
+                        {{ getFormattedDate(item.created_at) }}
+                    </template>
+                    <template v-slot:[`item.updated_at`]="{ item }">
+                        {{ getFormattedDate(item.updated_at) }}
+                    </template>
+                    <!-- <template v-slot:[`item.actions`]="{ item }">
+                        <v-icon
+                            small
+                            class="mr-2"
+                            @click="toggleUpdate(true , item)"
+                        >
+                            mdi-pencil
+                        </v-icon>
+                        <v-icon
+                            small
+                            @click="toggleDelete(true , item)"
+                        >
+                            mdi-delete
+                        </v-icon>
+                    </template> -->
+                        <template v-slot:no-data>
+                        <v-btn
+                            color="primary"
+                            @click="initialize"
+                        >
+                            Reset
+                        </v-btn>
+                    </template>
+                    </v-data-table>
+                </v-card-text>
+            </v-card>
+        </v-container>
 
 
 <!-- ################################# DIALOGS #################################-->
         <!-- dialogStore Start -->
-          <v-dialog v-model="dialogStore" max-width="400" persistent>
+          <v-dialog v-model="dialogStore" max-width="500" persistent>
                 <v-card>
                     <v-card-title> 
                       <span class="overline">Create New Supply</span> 
@@ -106,6 +162,24 @@
                                                     name="name" 
                                                     class="required"
                                                     :rules="rules.uniqueData(SUPPLIERS)"
+                                                > </v-text-field>
+
+                                                <v-text-field 
+                                                    outlined 
+                                                    dense 
+                                                    label="Unit"
+                                                    name="unit" 
+                                                    class="required"
+                                                > </v-text-field>
+
+                                                <v-text-field 
+                                                    outlined 
+                                                    dense 
+                                                    label="Unit Price"
+                                                    name="unit_price" 
+                                                    class="required"
+                                                    type="number"
+                                                    :rules="[v => !isNaN(parseFloat(v)) && v > 0 || 'Input must be a number greater than 0']"
                                                 > </v-text-field>
 
                                                 <v-autocomplete
@@ -159,6 +233,17 @@
                                                     @change="setSupplierInfo(tempData.id)"
                                                 > </v-autocomplete>
 
+                                                <v-text-field 
+                                                    v-model="tempData.serial_number"
+                                                    outlined 
+                                                    dense 
+                                                    label="Serial Number"
+                                                    name="serial_number" 
+                                                    class="required"
+                                                    :disabled="true"
+                                                > </v-text-field>
+
+
                                                 <v-autocomplete
                                                     v-model="tempData.supplier_id"
                                                     :items="SUPPLIERS"
@@ -173,6 +258,28 @@
                                                     dense
                                                     :disabled="true"
                                                 ></v-autocomplete>
+
+                                                <v-text-field 
+                                                    v-model="tempData.unit"
+                                                    outlined 
+                                                    dense 
+                                                    label="Unit"
+                                                    name="unit" 
+                                                    class="required"
+                                                    :disabled="true"
+                                                > </v-text-field>
+
+                                                <v-text-field 
+                                                    v-model="tempData.unit_price"
+                                                    outlined 
+                                                    dense 
+                                                    label="Unit Price"
+                                                    name="unit_price" 
+                                                    class="required"
+                                                    type="number"
+                                                    :rules="[v => !isNaN(parseFloat(v)) && v > 0 || 'Input must be a number greater than 0']"
+                                                    :disabled="true"
+                                                > </v-text-field>
 
                                                 <v-text-field 
                                                     outlined 
@@ -327,6 +434,16 @@ export default {
                     value: 'quantity',
                 },
                 {
+                    text: 'Unit',
+                    align: 'start',
+                    value: 'unit',
+                },
+                {
+                    text: 'Unit Price',
+                    align: 'start',
+                    value: 'unit_price',
+                },
+                {
                     text: 'Supplier',
                     align: 'start',
                     value: 'supplier',
@@ -350,7 +467,7 @@ export default {
             ],
             search: '',
             tempData: {},
-            tab: 0
+            tab: 0,
         }
     },
 
@@ -359,7 +476,12 @@ export default {
             'SUPPLIERS',
             'SUPPLIES',
             'rules',
-            'loggedInUser'
+            'loggedInUser',
+            'inventoryCount',
+            'pendingCount',
+            'pendingSalesOrderRequest',
+            'criticalSupplies',
+            'SUPPLIES_CRITICAL'
         ]),
     },
 
@@ -367,11 +489,18 @@ export default {
       ...mapActions([
           '_getSuppliers',
           '_getSupplies',
-          '_getPendingStockInRequest'
+          '_getPendingStockInRequest',
+          '_getPendingSalesOrderRequests',
+          '_getPendingStockInRequest',
+          '_getSuppliesCritical'
       ]),
       async initialize(){
           await this._getSuppliers()
           await this._getSupplies()
+          await this._getPendingStockInRequest()
+          await this._getPendingSalesOrderRequests()
+          await this._getPendingStockInRequest()
+          await this._getSuppliesCritical()
       },
       setSupplierInfo(id){
         const supply = this.SUPPLIES.find(res => res.id == id);
@@ -422,8 +551,7 @@ export default {
                     url: '/api/supply/store',
                     data: formdata
                 }).then(() => {
-                    this._getSupplies();
-                    this._getPendingStockInRequest();
+                    this.initialize();
                     this.$refs.Store.reset()
                     this.toggleStore(false);
                 }).catch((err) => {
@@ -510,9 +638,13 @@ export default {
             let year = newDate.getFullYear();
             let month = (1 + newDate.getMonth()).toString().padStart(2, '0');
             let day = newDate.getDate().toString().padStart(2, '0');
-        
-            return month + '/' + day + '/' + year;
+            let hours = newDate.getHours().toString().padStart(2, '0');
+            let minutes = newDate.getMinutes().toString().padStart(2, '0');
+            let seconds = newDate.getSeconds().toString().padStart(2, '0');
+
+            return month + '/' + day + '/' + year + ' ' + hours + ':' + minutes + ':' + seconds;
         }
+
     },
 
     async mounted(){

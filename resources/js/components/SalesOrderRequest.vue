@@ -244,8 +244,11 @@ export default {
             let year = newDate.getFullYear();
             let month = (1 + newDate.getMonth()).toString().padStart(2, '0');
             let day = newDate.getDate().toString().padStart(2, '0');
-        
-            return month + '/' + day + '/' + year;
+            let hours = newDate.getHours().toString().padStart(2, '0');
+            let minutes = newDate.getMinutes().toString().padStart(2, '0');
+            let seconds = newDate.getSeconds().toString().padStart(2, '0');
+
+            return month + '/' + day + '/' + year + ' ' + hours + ':' + minutes + ':' + seconds;
         },
         async toggleUpdate(isShow, object = {}){
             if( ! isShow ) {
@@ -291,7 +294,11 @@ export default {
                     method: 'POST',
                     url: `/api/sales_order_request/update/${this.tempData.sales_order_requests_id}`,
                     data: formdata
-                }).then(() => {
+                }).then((res) => {
+                    if(res.data == 'out_of_stock'){
+                        alert('Insuficient Quantity!')
+                        return;
+                    }
                     this._getSalesOrderRequests();
                     this.$refs.Update.reset()
                     this.toggleUpdate(false);

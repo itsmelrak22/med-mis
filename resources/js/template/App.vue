@@ -152,6 +152,7 @@ import {mapActions, mapState} from 'vuex';
             // {text:'Home', icon:'mdi-home', to:'home'},
             {text:'Supply Inventory', icon:'mdi-view-module', to:'supply'},
             {text: 'Sales Orders', icon: 'mdi-credit-card', to : 'sales_orders'},
+            {text: 'Reports', icon: 'mdi-credit-card', to : 'reports'},
             // {text: 'Order Details', icon: 'mdi-account', to : 'order_details'},
 
          ],

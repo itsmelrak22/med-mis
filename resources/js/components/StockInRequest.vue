@@ -110,7 +110,7 @@
                                     readonly
                                 > </v-text-field>
                                 <v-autocomplete
-                                    :items="['APPROVED', 'CANCELLED']"
+                                    :items="['APPROVED', 'CANCELLED', 'RETURN TO SELLER']"
                                     outlined 
                                     label="Status"
                                     name="status" 
@@ -165,6 +165,16 @@ export default {
                     text: 'Name',
                     align: 'start',
                     value: 'name',
+                },
+                {
+                    text: 'Unit Price',
+                    align: 'start',
+                    value: 'unit_price',
+                },
+                {
+                    text: 'Unit',
+                    align: 'start',
+                    value: 'unit',
                 },
                 {
                     text: 'Request Quantity',
@@ -228,8 +238,11 @@ export default {
             let year = newDate.getFullYear();
             let month = (1 + newDate.getMonth()).toString().padStart(2, '0');
             let day = newDate.getDate().toString().padStart(2, '0');
-        
-            return month + '/' + day + '/' + year;
+            let hours = newDate.getHours().toString().padStart(2, '0');
+            let minutes = newDate.getMinutes().toString().padStart(2, '0');
+            let seconds = newDate.getSeconds().toString().padStart(2, '0');
+
+            return month + '/' + day + '/' + year + ' ' + hours + ':' + minutes + ':' + seconds;
         },
         toggleUpdate(isShow, object = {}){
           if( ! isShow ) {

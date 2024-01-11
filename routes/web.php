@@ -2,6 +2,7 @@
 
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\SpaController;
+use App\Http\Controllers\PDFController;
 use App\Http\Controllers\Auth\AuthenticatedSessionController;
 /*
 |--------------------------------------------------------------------------
@@ -18,6 +19,13 @@ require __DIR__.'/auth.php';
 
 
 Route::middleware(['auth'])->group(function() {
+
+    Route::get('/generate-order-slip-{id}', [PDFController::class, 'generateOrderSlip']);
+    Route::get('/generate-stock-in-request', [PDFController::class, 'generateStockInRequestAll']);
+    Route::get('/generate-stock-in-request-approved', [PDFController::class, 'generateStockInApproved']);
+    Route::get('/generate-stock-in-request-pending', [PDFController::class, 'generateStockInPending']);
+    Route::get('/generate-stock-in-request-cancelled', [PDFController::class, 'generateStockInCancelled']);
+    Route::get('/generate-stock-in-request-return-to-seller', [PDFController::class, 'generateStockInReturnToSeller']);
     /*  
     |
     | Some Routes needed to be before the route with "{any?}" parameter.

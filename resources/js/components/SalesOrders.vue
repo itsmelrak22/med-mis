@@ -41,22 +41,29 @@
                         {{ getFormattedDate(item.created_at) }}
                     </template>
                     <template v-slot:[`item.salesOrders_actions`]="{ item }">
-                        <v-icon
-                            small
-                            class="mr-2"
-                            @click="toggleSalesOrdersUpdate(true , item)"
-                        >
-                            mdi-pencil
-                        </v-icon>
+                        <v-tooltip top >
+                            <template v-slot:activator="{ on, attrs }">
+                                <v-icon
+                                    v-bind="attrs"
+                                    v-on="on"
+                                    small
+                                    class="mr-2"
+                                    @click="generateOrderSlip(item.sales_order_requests_id)"
+                                >
+                                    mdi-eye
+                                </v-icon>
+                            </template>
+                            <span>View OrderSlip</span>
+                        </v-tooltip>
                     </template>
-                    <template v-slot:no-data>
+                    <!-- <template v-slot:no-data>
                         <v-btn
                             color="primary"
                             @click="_getSalesOrderRequests"
                         >
                             Reset
                         </v-btn>
-                    </template>
+                    </template> -->
                 </v-data-table>
             </v-card-text>
         </v-card>
@@ -133,7 +140,7 @@
 
                                     <v-card-actions>
                                         <v-spacer></v-spacer>
-                                        <v-btn text @click="dialogStore = false">Cancel</v-btn>
+                                        <v-btn text @click="dialogSalesOrdersStore = false">Cancel</v-btn>
                                         <v-btn text type="submit">Submit</v-btn>
                                     </v-card-actions>
                                 </v-card-text>
@@ -205,7 +212,7 @@ export default {
                     align: 'start',
                     value: 'created_at',
                 },
-                // { text: 'Actions', value: 'salesOrders_actions', sortable: false, width: "10%" },
+                { text: 'Actions', value: 'salesOrders_actions', sortable: false, width: "10%" },
             ],
             search: '',
             tempData: {},
@@ -295,8 +302,19 @@ export default {
             let year = newDate.getFullYear();
             let month = (1 + newDate.getMonth()).toString().padStart(2, '0');
             let day = newDate.getDate().toString().padStart(2, '0');
-        
-            return month + '/' + day + '/' + year;
+            let hours = newDate.getHours().toString().padStart(2, '0');
+            let minutes = newDate.getMinutes().toString().padStart(2, '0');
+            let seconds = newDate.getSeconds().toString().padStart(2, '0');
+
+            return month + '/' + day + '/' + year + ' ' + hours + ':' + minutes + ':' + seconds;
+        },
+        generateOrderSlip(id){
+            console.log('id', id)
+            try {
+                window.open(`/generate-order-slip-${id}`);
+            } catch (error) {
+                console.error(error);
+            }
         }
         // ... (existing methods) ...
     },

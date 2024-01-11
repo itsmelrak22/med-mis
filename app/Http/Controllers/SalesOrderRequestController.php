@@ -29,6 +29,8 @@ class SalesOrderRequestController extends Controller
             'customers.name as customer_name',
             'sales_order_request_details.quantity',
             'supplies.name',
+            'supplies.unit',
+            'supplies.unit_price',
             'suppliers.name as supplier'
         )
         ->leftJoin('users', 'users.id', 'sales_order_requests.created_by')
@@ -54,6 +56,8 @@ class SalesOrderRequestController extends Controller
             'customers.name as customer_name',
             'sales_order_request_details.quantity',
             'supplies.name',
+            'supplies.unit',
+            'supplies.unit_price',
             'suppliers.name as supplier'
         )
         ->leftJoin('users', 'users.id', 'sales_order_requests.created_by')
@@ -70,15 +74,6 @@ class SalesOrderRequestController extends Controller
     public function store(Request $request)
     {
 
-        // return $request;
-
-        // "supply_id": "6",
-        // "supplier_id": "6",
-        // "customer_id": "8",
-        // "quantity": "100",
-        // "auth_id": "1",
-        // "stock_in_type": "existing",
-        // "supply_name": "Glass Bottle"
 
         try {
             \DB::beginTransaction();
@@ -130,6 +125,11 @@ class SalesOrderRequestController extends Controller
                     $supply_stock_in_request_detail   =   SalesOrderRequestDetail::findOrFail($request->sales_order_request_details_id);
 
                     $supply              = Supply::findOrFail($request->supply_id);
+
+                    if($supply->quantity < $supply_stock_in_request_detail->quantity){
+                        return 'out_of_stock';
+                    }
+
                     $supply->quantity    = $supply->quantity - $supply_stock_in_request_detail->quantity;
                     $supply->updated_by  = $request->auth_id;
                     $supply->updated_at = new \DateTime;

@@ -12,6 +12,7 @@ import OrderDetails from './components/OrderDetails'
 import SalesOrders from './components/SalesOrders'
 import StockInRequest from './components/StockInRequest'
 import SalesOrderRequest from './components/SalesOrderRequest'
+import Reports from './components/Reports'
 
 import store from './store'
 
@@ -42,6 +43,11 @@ export default new VueRouter({
             path: '/sales_orders',
             name: 'sales_orders',
             component : SalesOrders
+        },
+        {
+            path: '/reports',
+            name: 'reports',
+            component : Reports
         },
         {
             path: '/user',

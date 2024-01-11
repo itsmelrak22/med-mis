@@ -20,6 +20,10 @@ class SupplyController extends Controller
     {
         return Supply::GET_ALL_ACTIVE_BY_DESC();
     }
+    public function critical()
+    {
+        return Supply::GET_ALL_CRITICAL_BY_DESC();
+    }
 
     /**
      * Store a newly created resource in storage.
@@ -36,6 +40,8 @@ class SupplyController extends Controller
                 $supply                     = new Supply;
                 $supply->serial_number      = $request->serial_number;
                 $supply->name               = $request->name;
+                $supply->unit               = $request->unit;
+                $supply->unit_price         = $request->unit_price;
                 $supply->supplier_id        = $request->supplier_id;
                 $supply->status             = "INACTIVE";
                 $supply->updated_by         = $request->auth_id;

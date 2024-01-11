@@ -40,6 +40,7 @@ use App\Models\User;
     Route::delete('users/{id}', [UserController::class, 'destroy']);
 
     Route::get('/supplies', [SupplyController::class, 'index']);
+    Route::get('/supplies/critical', [SupplyController::class, 'critical']);
     Route::post('/supply/store', [SupplyController::class, 'store']);
     Route::post('/supply/store/exist/{supply}', [SupplyController::class, 'store_exist']);
     Route::post('/supply/update/{supply}', [SupplyController::class, 'update']);
