@@ -41,10 +41,24 @@
                                 class="mr-2"
                                 @click="toggleUpdate(true , item)"
                             >
-                                mdi-pencil
+                            mdi-checkbox-marked
                             </v-icon>
                         </template>
                         <span>Update Status</span>
+                    </v-tooltip>
+                    <v-tooltip top v-if="loggedInUser.is_super_admin || loggedInUser.is_super_admin">
+                        <template v-slot:activator="{ on, attrs }">
+                            <v-icon
+                                v-bind="attrs"
+                                v-on="on"
+                                small
+                                class="mr-2"
+                                @click="toggleUpdateInfo(true , item)"
+                            >
+                                mdi-pencil-box
+                            </v-icon>
+                        </template>
+                        <span>Update Info</span>
                     </v-tooltip>
                 </template>
                     <template v-slot:no-data>
@@ -144,6 +158,91 @@
         </v-dialog>
         <!-- dialogUpdate End -->
 
+        <!-- dialogUpdateInfo Start -->
+        <v-dialog v-model="dialogUpdateInfo" max-width="400" persistent>
+            <v-form id="Update" ref="Update" @submit.prevent="Update">
+                <v-card>
+                    <v-card-title> <span class="overline">Sales Order Request Request</span> </v-card-title>
+                        <v-card-text>
+                            <v-row>
+                              <v-col cols="12">
+                                <v-text-field 
+                                    v-model="tempData.name"
+                                    outlined 
+                                    dense 
+                                    label="Name"
+                                    name="name" 
+                                    readonly
+                                > </v-text-field>
+                                
+                                <v-text-field 
+                                    v-model="tempData.quantity"
+                                    outlined 
+                                    dense 
+                                    label="Sale Order Quantity"
+                                    name="quantity" 
+                                    readonly
+                                > </v-text-field>
+                                <v-text-field 
+                                    v-model="tempData.supplier"
+                                    outlined 
+                                    dense 
+                                    label="Supplier"
+                                    name="supplier"
+                                    readonly
+                                > </v-text-field>
+                                <v-text-field 
+                                    v-model="tempData.requested_by"
+                                    outlined 
+                                    dense 
+                                    label="Reqeuested By"
+                                    name="requested_by"
+                                    readonly
+                                > </v-text-field>
+                                <v-text-field 
+                                    v-model="tempData.requested_date"
+                                    outlined 
+                                    dense 
+                                    label="Requested Date"
+                                    name="requested_date" 
+                                    readonly
+                                > </v-text-field>
+                                <v-text-field 
+                                    v-model="itemInStockQty"
+                                    outlined 
+                                    dense 
+                                    label="Item in Stock Quantity"
+                                    readonly
+                                > </v-text-field>
+                                <v-autocomplete
+                                    v-model="tempData.status"
+                                    :items="['APPROVED', 'CANCELLED', 'RETURN TO SELLER']"
+                                    outlined 
+                                    label="Status"
+                                    name="status" 
+                                    class="required"
+                                    clearable
+                                    :rules="rules.required"
+                                    dense
+                                ></v-autocomplete>
+                                <input type="hidden" name="is_editted" :value="true">
+                                <input type="hidden" name="auth_id" :value="loggedInUser.id">
+                                <input type="hidden" name="supply_id" :value="tempData.supply_id">
+                                <input type="hidden" name="sales_order_request_details_id" :value="tempData.sales_order_request_details_id">
+                                <input type="hidden" name="sales_order_requests_id" :value="tempData.sales_order_requests_id">
+                              </v-col>
+                            </v-row>
+                        </v-card-text>
+                    <v-card-actions>
+                        <v-spacer></v-spacer>
+                        <v-btn text @click="dialogUpdateInfo = false">Cancel</v-btn>
+                        <v-btn text type="submit">Submit</v-btn>
+                    </v-card-actions>
+                </v-card>
+            </v-form>
+        </v-dialog>
+        <!-- dialogUpdate End -->
+
    
 
 <!-- ################################# OVERLAY #################################-->
@@ -166,6 +265,7 @@ export default {
         return {
             dialogView: false,
             dialogUpdate: false,
+            dialogUpdateInfo: false,
             overlay: false,
 
             headers: [
@@ -270,6 +370,28 @@ export default {
                 this.itemInStockQty = itemInStock.quantity
             }
         },
+        async toggleUpdateInfo(isShow, object = {}){
+            if( ! isShow ) {
+                this.dialogUpdateInfo = false;
+                this.tempData = {};
+                return;
+            }
+            if( ! Object.keys(object).length > 0 ) {
+                console.log( 'toggleUpdateInfo', 'no data' );
+                return;
+            }
+
+            await this._getSupplies()
+
+            this.dialogUpdateInfo = isShow;
+            this.tempData = {...object};
+            const itemInStock = this.SUPPLIES.find(res => res.id == this.tempData.supply_id);
+            if(itemInStock.id){
+                this.itemInStockQty = itemInStock.quantity
+            }
+
+            console.log('this.tempData', this.tempData)
+        },
         toggleView(isShow, object = {}){
           if( ! isShow ) {
               this.dialogView = false;
@@ -277,7 +399,6 @@ export default {
               return;
           }
           if( ! Object.keys(object).length > 0 ) {
-              console.log( 'toggleUpdate', 'no data' );
               return;
           }
 
@@ -302,6 +423,7 @@ export default {
                     this._getSalesOrderRequests();
                     this.$refs.Update.reset()
                     this.toggleUpdate(false);
+                    this.toggleUpdateInfo(false);
                 }).catch((err) => {
                     console.log("ERROR __")
                     console.err(err)
