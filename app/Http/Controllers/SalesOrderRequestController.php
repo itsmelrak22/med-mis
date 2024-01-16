@@ -115,15 +115,28 @@ class SalesOrderRequestController extends Controller
     {
         try {
             \DB::beginTransaction();
+                if( isset($request->is_editted) ){
+                    if( $salesOrderRequest->status == 'APPROVED' && $request->status == 'RETURN TO SELLER'){
+                        $supply_stock_in_request_detail   =   SalesOrderRequestDetail::findOrFail($request->sales_order_request_details_id);
+                        $supply              = Supply::findOrFail($request->supply_id);
+                        $supply->quantity    = $supply->quantity + $supply_stock_in_request_detail->quantity;
+                        $supply->updated_by  = $request->auth_id;
+                        $supply->updated_at = new \DateTime;
+                        $supply->save();
+                        $supply_id = $supply->id;
+                    }
+                }
+
                 $salesOrderRequest->status            =   $request->status; // PENDING, APPROVED, CANCELLED;
                 $salesOrderRequest->updated_by        =   $request->auth_id;
                 $salesOrderRequest->save();
+
+              
 
 
                 if( $request->status == 'APPROVED' ){
                    
                     $supply_stock_in_request_detail   =   SalesOrderRequestDetail::findOrFail($request->sales_order_request_details_id);
-
                     $supply              = Supply::findOrFail($request->supply_id);
 
                     if($supply->quantity < $supply_stock_in_request_detail->quantity){

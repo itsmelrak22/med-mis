@@ -35,6 +35,19 @@ class SupplyStockInRequestController extends Controller
     {
          try {
             \DB::beginTransaction();
+
+            if( isset($request->is_editted) ){
+                if( $supplyStockInRequest->status == 'APPROVED' && $request->status == 'RETURN TO SELLER'){
+                    $supply_stock_in_request_detail   =   SupplyStockInRequestDetail::findOrFail($request->supply_stock_in_request_detail_id);
+                    $supply              = Supply::findOrFail($request->supply_id);
+                    $supply->quantity    = $supply->quantity - $supply_stock_in_request_detail->quantity;
+                    $supply->updated_by  = $request->auth_id;
+                    $supply->updated_at = new \DateTime;
+                    $supply->save();
+                    $supply_id = $supply->id;
+                }
+            }
+
                 $supplyStockInRequest->status            =   $request->status; // PENDING, APPROVED, CANCELLED;
                 $supplyStockInRequest->updated_by        =   $request->auth_id;
                 $supplyStockInRequest->save();
@@ -61,7 +74,6 @@ class SupplyStockInRequestController extends Controller
 
         \DB::commit();
         return 'success';
-
     }
 
     /**
