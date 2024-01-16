@@ -1,133 +1,66 @@
 <template>
     <v-container fluid>
-        <div>
-              <v-sparkline
-                :value="value"
-                :gradient="gradient"
-                :smooth="radius || false"
-                :padding="padding"
-                :line-width="width"
-                :stroke-linecap="lineCap"
-                :gradient-direction="gradientDirection"
-                :fill="fill"
-                :type="type"
-                :auto-line-width="autoLineWidth"
-                auto-draw
-            ></v-sparkline>
-        </div>
-        <v-divider></v-divider>
-        <div>
-            <v-container fluid>
-                <v-sparkline
-                :fill="fill"
-                :gradient="selectedGradient"
-                :line-width="width"
-                :padding="padding"
-                :smooth="radius || false"
-                :value="value"
-                auto-draw
-                ></v-sparkline>
-
-                <v-divider></v-divider>
-
+        <v-container>
+            <v-card>
                 <v-row>
-                <v-col
-                    cols="12"
-                    md="6"
-                >
-                    <v-row
-                    class="fill-height"
-                    align="center"
-                    >
-                    <v-item-group
-                        v-model="selectedGradient"
-                        mandatory
-                    >
-                        <v-row>
-                        <v-item
-                            v-for="(gradient, i) in gradients"
-                            :key="i"
-                            v-slot="{ active, toggle }"
-                            :value="gradient"
-                        >
-                            <v-card
-                            :style="{
-                                background: gradient.length > 1
-                                ? `linear-gradient(0deg, ${gradient})`
-                                : gradient[0],
-                                border: '2px solid',
-                                borderColor: active ? '#222' : 'white'
-                            }"
-                            width="30"
-                            height="30"
-                            class="mr-2"
-                            @click.native="toggle"
-                            ></v-card>
-                        </v-item>
-                        </v-row>
-                    </v-item-group>
-                    </v-row>
-                </v-col>
+                    <v-col class="mx-2">
+                        <v-alert
+                            border="left"
+                            color="indigo"
+                            dark
+                            max-width="200"
+                            >
+                            Inventory : {{ inventoryCount }}
+                        </v-alert>
+                    </v-col>
+                    <v-col class="mx-2">
+                        <v-alert
+                            border="left"
+                            color="green"
+                            dark
+                            max-width="200"
+                            >
+                            Transaction : {{ pendingSalesOrderRequest }}
 
-                <v-col
-                    cols="12"
-                    md="6"
-                >
-                    <v-slider
-                    v-model="width"
-                    label="Width"
-                    min="0.1"
-                    max="10"
-                    step="0.1"
-                    thumb-label
-                    ></v-slider>
-                </v-col>
+                        </v-alert>
+                    </v-col>
+                    <v-col class="mx-2">
+                        <v-alert
+                            border="left"
+                            color="orange"
+                            dark
+                            max-width="200"
+                            >
+                            Pending : {{ pendingCount }}
 
-                <v-col cols="6">
-                    <v-row
-                    class="fill-height"
-                    align="center"
-                    >
-                    <v-switch
-                        v-model="fill"
-                        label="Filled"
-                    ></v-switch>
-                    </v-row>
-                </v-col>
+                        </v-alert>
+                    </v-col>
+                    <v-col class="mx-2">
+                        <v-alert
+                            border="left"
+                            color="red"
+                            dark
+                            max-width="200"
+                            >
+                            Critical : {{ criticalSupplies }}
 
-                <v-col
-                    cols="12"
-                    md="6"
-                >
-                    <v-slider
-                    v-model="radius"
-                    label="Radius"
-                    min="0"
-                    max="25"
-                    thumb-label
-                    ></v-slider>
-                </v-col>
-
-                <v-col
-                    cols="12"
-                    md="6"
-                    offset-md="6"
-                >
-                    <v-slider
-                    v-model="padding"
-                    label="Padding"
-                    min="0"
-                    max="25"
-                    thumb-label
-                    ></v-slider>
-                </v-col>
+                        </v-alert>
+                    </v-col>
                 </v-row>
-            </v-container>
-        </div>
+            </v-card>
+        </v-container>
+        <v-divider></v-divider>
+        
+        <v-container>
+            <BarChart />
+        </v-container>
     </v-container>
 </template>
 
 <script>
+import { mapActions, mapState } from 'vuex';
+import BarChart from './BarChart.vue'
+
   const gradients = [
     ['#222'],
     ['#42b3f4'],
@@ -138,6 +71,9 @@
   ]
 
   export default {
+    components: {
+        BarChart
+    },
     data: () => ({
       width: 2,
       radius: 10,
@@ -151,5 +87,41 @@
       type: 'trend',
       autoLineWidth: false,
     }),
+    computed:{
+        ...mapState([
+            'SUPPLIERS',
+            'SUPPLIES',
+            'rules',
+            'loggedInUser',
+            'inventoryCount',
+            'pendingCount',
+            'pendingSalesOrderRequest',
+            'criticalSupplies',
+            'SUPPLIES_CRITICAL'
+        ]),
+    },
+
+    methods: {
+      ...mapActions([
+          '_getSuppliers',
+          '_getSupplies',
+          '_getPendingStockInRequest',
+          '_getPendingSalesOrderRequests',
+          '_getPendingStockInRequest',
+          '_getSuppliesCritical'
+      ]),
+      async initialize(){
+        await this._getSupplies()
+          await this._getSuppliers()
+          await this._getPendingStockInRequest()
+          await this._getPendingSalesOrderRequests()
+          await this._getPendingStockInRequest()
+          await this._getSuppliesCritical()
+      },
+    },
+    async mounted(){
+        await this.initialize()
+    }
+
   }
 </script>

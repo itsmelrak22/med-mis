@@ -149,7 +149,7 @@ import {mapActions, mapState} from 'vuex';
       data: () => ({
          drawer: null,
          items:[
-            // {text:'Home', icon:'mdi-home', to:'home'},
+            {text:'Home', icon:'mdi-home', to:'home'},
             {text:'Supply Inventory', icon:'mdi-view-module', to:'supply'},
             {text: 'Sales Orders', icon: 'mdi-credit-card', to : 'sales_orders'},
             {text: 'Reports', icon: 'mdi-credit-card', to : 'reports'},

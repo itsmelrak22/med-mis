@@ -19,55 +19,7 @@
             </v-card>
         </v-container>
 
-        <v-container>
-            <v-card>
-                <v-row>
-                    <v-col class="mx-2">
-                        <v-alert
-                            border="left"
-                            color="indigo"
-                            dark
-                            max-width="200"
-                            >
-                            Inventory : {{ inventoryCount }}
-                        </v-alert>
-                    </v-col>
-                    <v-col class="mx-2">
-                        <v-alert
-                            border="left"
-                            color="green"
-                            dark
-                            max-width="200"
-                            >
-                            Transaction : {{ pendingSalesOrderRequest }}
 
-                        </v-alert>
-                    </v-col>
-                    <v-col class="mx-2">
-                        <v-alert
-                            border="left"
-                            color="orange"
-                            dark
-                            max-width="200"
-                            >
-                            Pending : {{ pendingCount }}
-
-                        </v-alert>
-                    </v-col>
-                    <v-col class="mx-2">
-                        <v-alert
-                            border="left"
-                            color="red"
-                            dark
-                            max-width="200"
-                            >
-                            Critical : {{ criticalSupplies }}
-
-                        </v-alert>
-                    </v-col>
-                </v-row>
-            </v-card>
-        </v-container>
 
         <v-container>
             <v-card>
@@ -198,7 +150,7 @@
                                                 <v-text-field 
                                                     outlined 
                                                     dense 
-                                                    label="Quantity"
+                                                    label="Initial Quantity"
                                                     name="quantity" 
                                                     class="required"
                                                     type="number"
@@ -284,7 +236,7 @@
                                                 <v-text-field 
                                                     outlined 
                                                     dense 
-                                                    label="Quantity"
+                                                    label="Existing Quantity"
                                                     name="quantity" 
                                                     class="required"
                                                     type="number"
