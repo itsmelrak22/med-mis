@@ -56,6 +56,44 @@
                             <span>View OrderSlip</span>
                         </v-tooltip>
                     </template>
+                    <template v-slot:[`item.status`]="{ item }">
+                        <v-chip
+                            class="ma-2"
+                            color="orange"
+                            text-color="white"
+                            small
+                            v-if="item.status == 'RETURN TO SELLER'"
+                        >
+                            RETURN TO SELLER
+                        </v-chip>
+                        <v-chip
+                            class="ma-2"
+                            color="red"
+                            text-color="white"
+                            small
+                            v-else-if="item.status == 'CANCELLED'"
+                        >
+                        CANCELLED
+                        </v-chip>
+                        <v-chip
+                            class="ma-2"
+                            color="green"
+                            text-color="white"
+                            small
+                            v-else-if="item.status == 'APPROVED'"
+                        >
+                        APPROVED
+                        </v-chip>
+                        <v-chip
+                            class="ma-2"
+                            text-color="white"
+                            small
+                            dark
+                            v-else-if="item.status == 'PENDING'"
+                        >
+                        PENDING
+                        </v-chip>
+                </template>
                     <!-- <template v-slot:no-data>
                         <v-btn
                             color="primary"
@@ -246,7 +284,6 @@ export default {
                 this.tempData = supply
                 this.tempData.supply_id = supply.id
                 this.tempData.supplier_id = +this.tempData.supplier_id
-                console.log('this.tempData', this.tempData)
             }
         },
         async initializeSalesOrders(){

@@ -31,6 +31,44 @@
                 <template v-slot:[`item.updated_at`]="{ item }">
                     {{ getFormattedDate(item.updated_at) }}
                 </template>
+                <template v-slot:[`item.status`]="{ item }">
+                        <v-chip
+                            class="ma-2"
+                            color="orange"
+                            text-color="white"
+                            small
+                            v-if="item.status == 'RETURN TO SELLER'"
+                        >
+                            RETURN TO SELLER
+                        </v-chip>
+                        <v-chip
+                            class="ma-2"
+                            color="red"
+                            text-color="white"
+                            small
+                            v-else-if="item.status == 'CANCELLED'"
+                        >
+                        CANCELLED
+                        </v-chip>
+                        <v-chip
+                            class="ma-2"
+                            color="green"
+                            text-color="white"
+                            small
+                            v-else-if="item.status == 'APPROVED'"
+                        >
+                        APPROVED
+                        </v-chip>
+                        <v-chip
+                            class="ma-2"
+                            text-color="white"
+                            small
+                            dark
+                            v-else-if="item.status == 'PENDING'"
+                        >
+                        PENDING
+                        </v-chip>
+                </template>
                 <template v-slot:[`item.actions`]="{ item }">
                     <v-tooltip top v-if="item.status == 'PENDING'">
                         <template v-slot:activator="{ on, attrs }">
@@ -390,7 +428,6 @@ export default {
                 this.itemInStockQty = itemInStock.quantity
             }
 
-            console.log('this.tempData', this.tempData)
         },
         toggleView(isShow, object = {}){
           if( ! isShow ) {

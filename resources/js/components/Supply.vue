@@ -51,6 +51,26 @@
                     <template v-slot:[`item.updated_at`]="{ item }">
                         {{ getFormattedDate(item.updated_at) }}
                     </template>
+                    <template v-slot:[`item.status`]="{ item }">
+                        <v-chip
+                            class="ma-2"
+                            color="green"
+                            text-color="white"
+                            small
+                            v-if="item.status == 'ACTIVE'"
+                        >
+                            ACTIVE
+                        </v-chip>
+                        <v-chip
+                            class="ma-2"
+                            color="green"
+                            text-color="white"
+                            small
+                            v-else-if="item.status == 'INACTIVE'"
+                        >
+                        INACTIVE
+                        </v-chip>
+                    </template>
                     <!-- <template v-slot:[`item.actions`]="{ item }">
                         <v-icon
                             small
@@ -400,11 +420,11 @@ export default {
                     align: 'start',
                     value: 'supplier',
                 },
-                {
-                    text: 'Status',
-                    align: 'start',
-                    value: 'status',
-                },
+                // {
+                //     text: 'Status',
+                //     align: 'start',
+                //     value: 'status',
+                // },
                 {
                     text: 'Stock In Date',
                     align: 'start',

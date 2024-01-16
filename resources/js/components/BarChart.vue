@@ -99,7 +99,6 @@ import { mapActions, mapState } from 'vuex';
     },
     mounted() {
       setTimeout(() => {
-        console.log('SUPPLIES', this.SUPPLIES)
         this.SUPPLIES.forEach(el => {
           this.chartData.labels.push(el.name);
           this.chartData.datasets[0].data.push(el.quantity);

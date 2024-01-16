@@ -141,7 +141,6 @@ export default new Vuex.Store({
                 method: "get",
                 url: "/api/suppliers"
             }).then(({ data }) => {
-                console.log(data)
                 commit("_getSuppliers", data)
             })
         },
@@ -150,7 +149,6 @@ export default new Vuex.Store({
                 method: "get",
                 url: "/api/supplies"
             }).then(({ data }) => {
-                console.log(data)
                 commit("_getSupplies", data)
             })
         },
@@ -159,7 +157,6 @@ export default new Vuex.Store({
                 method: "get",
                 url: "/api/users"
             }).then(({ data }) => {
-                console.log(data)
                 commit("_getUsers", data)
             })
         },

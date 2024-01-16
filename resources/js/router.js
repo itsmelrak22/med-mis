@@ -54,7 +54,6 @@ export default new VueRouter({
             name: 'user',
             component : User,
             beforeEnter: (to, from, next) => {
-                console.log('store.state.loggedInUser', store.state.loggedInUser)
                 // replace `store.state.user` with your actual user state
                 if (store.state.loggedInUser.is_super_admin || store.state.loggedInUser.is_admin) {
                   next(); // proceed to '/supply' if admin
@@ -70,7 +69,6 @@ export default new VueRouter({
             name: 'stock_in_request',
             component : StockInRequest,
             beforeEnter: (to, from, next) => {
-                console.log('store.state.loggedInUser', store.state.loggedInUser)
                 // replace `store.state.user` with your actual user state
                 if (store.state.loggedInUser.is_super_admin || store.state.loggedInUser.is_admin) {
                   next(); // proceed to '/supply' if admin
@@ -86,7 +84,6 @@ export default new VueRouter({
             name: 'sales_order_request',
             component : SalesOrderRequest,
             beforeEnter: (to, from, next) => {
-                console.log('store.state.loggedInUser', store.state.loggedInUser)
                 // replace `store.state.user` with your actual user state
                 if (store.state.loggedInUser.is_super_admin || store.state.loggedInUser.is_admin) {
                   next(); // proceed to '/supply' if admin
@@ -102,7 +99,6 @@ export default new VueRouter({
             name: 'customer',
             component : Customer,
             beforeEnter: (to, from, next) => {
-                console.log('store.state.loggedInUser', store.state.loggedInUser)
                 // replace `store.state.user` with your actual user state
                 if (store.state.loggedInUser.is_super_admin || store.state.loggedInUser.is_admin) {
                   next(); // proceed to '/supply' if admin
@@ -118,7 +114,6 @@ export default new VueRouter({
             name: 'supplier',
             component : Supplier,
             beforeEnter: (to, from, next) => {
-                console.log('store.state.loggedInUser', store.state.loggedInUser)
                 // replace `store.state.user` with your actual user state
                 if (store.state.loggedInUser.is_super_admin || store.state.loggedInUser.is_admin) {
                   next(); // proceed to '/supply' if admin
