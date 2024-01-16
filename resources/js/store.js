@@ -241,7 +241,7 @@ export default new Vuex.Store({
     mutations:{
         login(state, payload){
             state.loggedInUser = payload
-            window.location.href='/';
+            window.location.href='/home';
         },
 
         logout(state){

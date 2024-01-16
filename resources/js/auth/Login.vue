@@ -12,7 +12,7 @@
                 ></v-progress-linear>
               </template>
               <v-card-title class="justify-left">
-                  MCCBIOTECH MIS
+                  <v-img src="./../../assets/img/logo.png"></v-img>
               </v-card-title>
               <v-divider></v-divider>
               <v-card-text>

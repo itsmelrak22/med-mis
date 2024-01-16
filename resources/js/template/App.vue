@@ -45,7 +45,12 @@
 
       <v-app-bar app>
          <v-app-bar-nav-icon @click="drawer = !drawer"></v-app-bar-nav-icon>
-         <v-toolbar-title>MCCBIOTECH MIS</v-toolbar-title>
+         <v-toolbar-title>
+            <v-img src="./../../assets/img/logo.png"
+            max-height="57"
+            ></v-img>
+
+         </v-toolbar-title>
          <v-spacer></v-spacer>
          <span class="overline">{{loggedInUser.email}}</span>
          <v-tooltip bottom>
