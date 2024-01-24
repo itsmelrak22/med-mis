@@ -212,8 +212,8 @@ import {mapActions, mapState} from 'vuex';
                 }).then(() => {
                     this.$refs.ChangePassword.reset()
                   //   this.dialogChangePassword = false;
+                  this.toggleLogout();
                   alert("PLEASE LOGIN AGAIN");
-                  // this.toggleLogout();
                 }).catch((err) => {
                     console.log("ERROR __")
                     console.err(err)
@@ -231,7 +231,10 @@ import {mapActions, mapState} from 'vuex';
                     method: 'POST',
                     url: `/logout`,
                     data: formdata
-                }).catch((err) => {
+                }).then((res) => {
+                  console.log(res.data)
+                })
+                .catch((err) => {
                     console.log("ERROR __")
                     console.err(err)
                 })
